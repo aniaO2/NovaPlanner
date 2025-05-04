@@ -1,6 +1,0 @@
-@Interface.Server_HostAddress = http://localhost:5252
-
-###GET {{Interface.Server_HostAddress}}/weatherforecast/
-###Accept: application/json
-
-###
