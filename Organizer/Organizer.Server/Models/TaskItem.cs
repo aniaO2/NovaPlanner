@@ -1,5 +1,4 @@
-﻿
-using MongoDB.Bson;
+﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace Organizer.Server.Models
@@ -7,11 +6,13 @@ namespace Organizer.Server.Models
     public class TaskItem
     {
         [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string? Id { get; set; }
+        public ObjectId Id { get; set; }
 
-        public string Title { get; set; } = string.Empty;
-        public bool IsCompleted { get; set; } = false;
+        public string Description { get; set; } = string.Empty;
+        public int Length { get; set; }
+        public bool IsDone { get; set; }
+
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string ListId { get; set; } = string.Empty;
     }
 }
-
