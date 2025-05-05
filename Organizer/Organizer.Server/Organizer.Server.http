@@ -1,6 +1,23 @@
-@Organizer.Server_HostAddress = http://localhost:5211
+### Register a user
+POST http://localhost:5000/api/auth/register
+Content-Type: application/json
 
-GET {{Organizer.Server_HostAddress}}/weatherforecast/
-Accept: application/json
+{
+    "username": "testuser",
+    "email": "test@example.com",
+    "password": "password123"
+}
 
-###
+### Login a user
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+{
+    "email": "test@example.com",
+    "password": "password123"
+}
+
+### Get tasks for a user
+GET http://localhost:5000/api/task
+Authorization: Bearer {your-jwt-token}
+

@@ -3,25 +3,27 @@ using Organizer.Server.Models;
 using Microsoft.Extensions.Options;
 using System.Security.Cryptography;
 using System.Text;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
+using System;
 
 namespace Organizer.Server.Services
 {
     public class UserService
     {
         private readonly IMongoCollection<User> _users;
+        private readonly string _jwtSecret;
 
-        public UserService(IOptions<MongoDBSettings> dbSettings)
+        public UserService(IOptions<MongoDBSettings> dbSettings, string jwtSecret)
         {
             var client = new MongoClient(dbSettings.Value.ConnectionString);
             var database = client.GetDatabase(dbSettings.Value.DatabaseName);
             _users = database.GetCollection<User>("Users");
+            _jwtSecret = jwtSecret; // You can store this in appsettings.json or environment variables
         }
 
-        public async Task<User?> GetByUsernameAsync(string username)
-        {
-            return await _users.Find(u => u.Username == username).FirstOrDefaultAsync();
-        }
-
+        // Register a new user (username, email, password)
         public async Task<bool> RegisterAsync(string username, string email, string password)
         {
             if (await _users.Find(u => u.Username == username || u.Email == email).AnyAsync())
@@ -32,23 +34,42 @@ namespace Organizer.Server.Services
             {
                 Username = username,
                 Email = email,
-                PasswordHash = hashedPassword
+                Password = hashedPassword
             };
 
             await _users.InsertOneAsync(user);
             return true;
         }
 
-        public async Task<bool> LoginAsync(string username, string password)
+        // Login a user (username, password)
+        public async Task<string?> LoginAsync(string username, string password)
         {
             var user = await GetByUsernameAsync(username);
             if (user == null)
-                return false;
+                return null;
 
-            return VerifyPassword(password, user.PasswordHash);
+            if (VerifyPassword(password, user.Password))
+            {
+                // Generate JWT token after successful login
+                return GenerateJwtToken(user);
+            }
+
+            return null;
         }
 
-        // Password hashing using SHA256 (you can use BCrypt for better security later)
+        // Get a user by their username
+        public async Task<User?> GetByUsernameAsync(string username)
+        {
+            return await _users.Find(u => u.Username == username).FirstOrDefaultAsync();
+        }
+
+        // Get a user by their email
+        public async Task<User?> GetByEmailAsync(string email)
+        {
+            return await _users.Find(u => u.Email == email).FirstOrDefaultAsync();
+        }
+
+        // Hashing password using SHA256
         private string HashPassword(string password)
         {
             using var sha = SHA256.Create();
@@ -57,10 +78,35 @@ namespace Organizer.Server.Services
             return Convert.ToBase64String(hash);
         }
 
+        // Verifying if the password is correct
         private bool VerifyPassword(string password, string storedHash)
         {
             var hashedInput = HashPassword(password);
             return hashedInput == storedHash;
+        }
+
+        // Generate JWT token for the user
+        private string GenerateJwtToken(User user)
+        {
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.Email, user.Email)
+            };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSecret));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                issuer: "OrganizerApp",
+                audience: "OrganizerApp",
+                claims: claims,
+                expires: DateTime.Now.AddHours(1),
+                signingCredentials: creds
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }

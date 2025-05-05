@@ -1,38 +1,47 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using Organizer.Server.Models;
 using Organizer.Server.Services;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Configure MongoDB settings
+builder.Services.Configure<MongoDBSettings>(builder.Configuration.GetSection("MongoDB"));
 
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-builder.Services.Configure<MongoDBSettings>(
-    builder.Configuration.GetSection("MongoDB"));
-
+// Register services
+builder.Services.AddSingleton<UserService>();
 builder.Services.AddSingleton<TaskService>();
+
+// Configure JWT settings
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
+
+// Add authentication with JWT
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = false, // Set this to true if you want to validate the issuer
+            ValidateAudience = false, // Set this to true if you want to validate the audience
+            ValidateLifetime = true, // Ensure that the token is valid and not expired
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Secret"])) // Your secret key
+        };
+    });
+
+// Add authorization
+builder.Services.AddAuthorization();
+
+// Add controllers
+builder.Services.AddControllers();
 
 var app = builder.Build();
 
-app.UseDefaultFiles();
-app.UseStaticFiles();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-app.UseHttpsRedirection();
-
+// Use authentication and authorization middleware
+app.UseAuthentication();
 app.UseAuthorization();
 
+// Map controllers
 app.MapControllers();
-
-app.MapFallbackToFile("/index.html");
 
 app.Run();

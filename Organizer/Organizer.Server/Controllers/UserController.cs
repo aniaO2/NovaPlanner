@@ -14,6 +14,7 @@ namespace Organizer.Server.Controllers
             _userService = userService;
         }
 
+        // Register a new user
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
@@ -21,11 +22,17 @@ namespace Organizer.Server.Controllers
             return success ? Ok("User registered.") : BadRequest("Username or email already exists.");
         }
 
+        // Login and generate JWT token
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            var success = await _userService.LoginAsync(request.Username, request.Password);
-            return success ? Ok("Login successful.") : Unauthorized("Invalid credentials.");
+            var token = await _userService.LoginAsync(request.Username, request.Password);
+            if (token == null)
+            {
+                return Unauthorized("Invalid credentials.");
+            }
+
+            return Ok(new { Token = token });
         }
 
         public class RegisterRequest
@@ -40,6 +47,5 @@ namespace Organizer.Server.Controllers
             public string Username { get; set; } = string.Empty;
             public string Password { get; set; } = string.Empty;
         }
-
     }
 }

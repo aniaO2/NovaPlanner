@@ -1,36 +1,71 @@
-﻿using Microsoft.Extensions.Options;
-using MongoDB.Driver;
+﻿using MongoDB.Driver;
+using Microsoft.Extensions.Options;
 using Organizer.Server.Models;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
 
 namespace Organizer.Server.Services
 {
     public class TaskService
     {
         private readonly IMongoCollection<TaskItem> _tasks;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public TaskService(IOptions<MongoDBSettings> mongoDBSettings)
+        public TaskService(IOptions<MongoDBSettings> settings, IHttpContextAccessor httpContextAccessor)
         {
-            // Get settings from appsettings.json
-            var settings = mongoDBSettings.Value;
-
-            // Create MongoDB client and connect to the database and collection
-            var client = new MongoClient(settings.ConnectionString);
-            var database = client.GetDatabase(settings.DatabaseName);
-            _tasks = database.GetCollection<TaskItem>(settings.TasksCollectionName);
+            var client = new MongoClient(settings.Value.ConnectionString);
+            var database = client.GetDatabase(settings.Value.DatabaseName);
+            _tasks = database.GetCollection<TaskItem>("Tasks");
+            _httpContextAccessor = httpContextAccessor;
         }
 
-        // Get all tasks
-        public async Task<List<TaskItem>> GetAsync()
+        // Get tasks for a specific user (from JWT userId)
+        public async Task<List<TaskItem>> GetByUserAsync()
         {
-            return await _tasks.Find(task => true).ToListAsync();
+            var userId = GetUserIdFromClaims();
+            if (userId == null)
+                return new List<TaskItem>();
+
+            return await _tasks.Find(t => t.UserId == userId).ToListAsync();
         }
 
-        // Create a new task
-        public async Task CreateAsync(TaskItem newTask)
+        // Create a new task for the current user
+        public async Task CreateAsync(TaskItem task)
         {
-            await _tasks.InsertOneAsync(newTask);
+            var userId = GetUserIdFromClaims();
+            if (userId != null)
+            {
+                task.UserId = userId;  // Associate task with the user
+                await _tasks.InsertOneAsync(task);
+            }
         }
 
-        // Optional: Update, Delete methods can go here as well
+        // Update an existing task for the current user
+        public async Task UpdateAsync(string id, TaskItem updatedTask)
+        {
+            var userId = GetUserIdFromClaims();
+            if (userId != null)
+            {
+                updatedTask.UserId = userId;  // Ensure task is updated for the correct user
+                await _tasks.ReplaceOneAsync(t => t.Id == id && t.UserId == userId, updatedTask);
+            }
+        }
+
+        // Delete a task by ID for the current user
+        public async Task DeleteAsync(string id)
+        {
+            var userId = GetUserIdFromClaims();
+            if (userId != null)
+            {
+                await _tasks.DeleteOneAsync(t => t.Id == id && t.UserId == userId);
+            }
+        }
+
+        // Helper method to extract the userId from the JWT token
+        private string? GetUserIdFromClaims()
+        {
+            var userId = _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+            return userId;
+        }
     }
 }
