@@ -6,7 +6,6 @@ using System.Text;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
-using System;
 
 namespace Organizer.Server.Services
 {
@@ -20,10 +19,9 @@ namespace Organizer.Server.Services
             var client = new MongoClient(dbSettings.Value.ConnectionString);
             var database = client.GetDatabase(dbSettings.Value.DatabaseName);
             _users = database.GetCollection<User>("Users");
-            _jwtSecret = jwtSecret; // You can store this in appsettings.json or environment variables
+            _jwtSecret = jwtSecret;
         }
 
-        // Register a new user (username, email, password)
         public async Task<bool> RegisterAsync(string username, string email, string password)
         {
             if (await _users.Find(u => u.Username == username || u.Email == email).AnyAsync())
@@ -41,7 +39,6 @@ namespace Organizer.Server.Services
             return true;
         }
 
-        // Login a user (username, password)
         public async Task<string?> LoginAsync(string username, string password)
         {
             var user = await GetByUsernameAsync(username);
@@ -50,26 +47,22 @@ namespace Organizer.Server.Services
 
             if (VerifyPassword(password, user.Password))
             {
-                // Generate JWT token after successful login
                 return GenerateJwtToken(user);
             }
 
             return null;
         }
 
-        // Get a user by their username
         public async Task<User?> GetByUsernameAsync(string username)
         {
             return await _users.Find(u => u.Username == username).FirstOrDefaultAsync();
         }
 
-        // Get a user by their email
         public async Task<User?> GetByEmailAsync(string email)
         {
             return await _users.Find(u => u.Email == email).FirstOrDefaultAsync();
         }
 
-        // Hashing password using SHA256
         private string HashPassword(string password)
         {
             using var sha = SHA256.Create();
@@ -78,14 +71,12 @@ namespace Organizer.Server.Services
             return Convert.ToBase64String(hash);
         }
 
-        // Verifying if the password is correct
         private bool VerifyPassword(string password, string storedHash)
         {
             var hashedInput = HashPassword(password);
             return hashedInput == storedHash;
         }
 
-        // Generate JWT token for the user
         private string GenerateJwtToken(User user)
         {
             var claims = new[]
@@ -102,7 +93,7 @@ namespace Organizer.Server.Services
                 issuer: "OrganizerApp",
                 audience: "OrganizerApp",
                 claims: claims,
-                expires: DateTime.Now.AddHours(1),
+                expires: DateTime.UtcNow.AddHours(1),
                 signingCredentials: creds
             );
 
