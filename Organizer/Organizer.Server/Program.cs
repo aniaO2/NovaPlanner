@@ -13,6 +13,9 @@ builder.Services.Configure<MongoDBSettings>(builder.Configuration.GetSection("Mo
 // Configure JWT settings
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
 
+// Register IHttpContextAccessor
+builder.Services.AddHttpContextAccessor();
+
 // Manually register UserService with injected jwtSecret string
 builder.Services.AddSingleton<UserService>(sp =>
 {

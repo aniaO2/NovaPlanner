@@ -11,6 +11,8 @@ namespace Organizer.Server.Models
 
         [BsonElement("userId")]
         public string UserId { get; set; } = string.Empty;
+        [BsonElement("listId")]
+        public string ListId { get; set; } = string.Empty;
 
         [BsonElement("title")]
         public string Title { get; set; } = string.Empty;
