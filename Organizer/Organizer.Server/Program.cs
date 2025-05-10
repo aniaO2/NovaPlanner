@@ -20,7 +20,8 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<UserService>(sp =>
 {
     var dbSettings = sp.GetRequiredService<IOptions<MongoDBSettings>>();
-    var jwtSecret = builder.Configuration["Jwt:Secret"];
+    var jwtSecret = builder.Configuration.GetValue<string>("JwtSettings:Secret")
+                    ?? throw new InvalidOperationException("JWT Secret is not configured.");
     return new UserService(dbSettings, jwtSecret);
 });
 
@@ -45,10 +46,25 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 builder.Services.AddControllers();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("https://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
+
 var app = builder.Build();
 
 // Middleware
+app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
+
+
 app.Run();

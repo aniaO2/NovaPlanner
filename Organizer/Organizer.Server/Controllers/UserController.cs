@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Organizer.Server.Services;
+using System.Text.Json.Serialization;
 
 namespace Organizer.Server.Controllers
 {
@@ -20,6 +21,7 @@ namespace Organizer.Server.Controllers
         {
             var success = await _userService.RegisterAsync(request.Username, request.Email, request.Password);
             return success ? Ok("User registered.") : BadRequest("Username or email already exists.");
+
         }
 
         // Login and generate JWT token
@@ -37,8 +39,13 @@ namespace Organizer.Server.Controllers
 
         public class RegisterRequest
         {
+            [JsonPropertyName("username")]
             public string Username { get; set; } = string.Empty;
+
+            [JsonPropertyName("email")]
             public string Email { get; set; } = string.Empty;
+
+            [JsonPropertyName("password")]
             public string Password { get; set; } = string.Empty;
         }
 

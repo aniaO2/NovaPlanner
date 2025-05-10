@@ -1,7 +1,7 @@
-// src/components/Login.js
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import UserService from '../../api/UserService';
+import UserService from '../api/UserService';
+import Register from './Register';
 
 const Login = () => {
     const [username, setUsername] = useState('');
@@ -16,10 +16,13 @@ const Login = () => {
             const { token } = await UserService.login(username, password);
             localStorage.setItem('token', token);
             navigate('/dashboard');
-        } catch (error) {
+        } catch {
             setError('Invalid credentials. Please try again.');
         }
     };
+    const goToRegister = () => {
+        navigate('/register');
+        };
 
     return (
         <div>
@@ -45,6 +48,7 @@ const Login = () => {
                     />
                 </div>
                 <button type="submit">Login</button>
+                <button onClick={goToRegister}>Register</button>
             </form>
         </div>
     );
