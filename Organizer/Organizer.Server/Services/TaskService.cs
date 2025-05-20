@@ -19,7 +19,7 @@ namespace Organizer.Server.Services
             _httpContextAccessor = httpContextAccessor;
         }
 
-        // Get tasks for a specific user (from JWT userId)
+        // Get all tasks for the current user
         public async Task<List<TaskItem>> GetByUserAsync()
         {
             var userId = GetUserIdFromClaims();
@@ -29,29 +29,47 @@ namespace Organizer.Server.Services
             return await _tasks.Find(t => t.UserId == userId).ToListAsync();
         }
 
+        // Get tasks filtered by type
+        public async Task<List<TaskItem>> GetByTypeAsync(string type)
+        {
+            var userId = GetUserIdFromClaims();
+            if (userId == null)
+                return new List<TaskItem>();
+
+            return await _tasks.Find(t => t.UserId == userId && t.Type == type).ToListAsync();
+        }
+
         // Create a new task for the current user
         public async Task CreateAsync(TaskItem task)
         {
             var userId = GetUserIdFromClaims();
             if (userId != null)
             {
-                task.UserId = userId;  // Associate task with the user
+                task.UserId = userId;
+
+                // Optionally initialize values depending on type
+                if (task.Type == "daily" && task.Streak == null)
+                    task.Streak = 0;
+
+                if (task.Type == "goal" && task.Progress == null)
+                    task.Progress = 0;
+
                 await _tasks.InsertOneAsync(task);
             }
         }
 
-        // Update an existing task for the current user
+        // Update an existing task
         public async Task UpdateAsync(string id, TaskItem updatedTask)
         {
             var userId = GetUserIdFromClaims();
             if (userId != null)
             {
-                updatedTask.UserId = userId;  // Ensure task is updated for the correct user
+                updatedTask.UserId = userId;
                 await _tasks.ReplaceOneAsync(t => t.Id == id && t.UserId == userId, updatedTask);
             }
         }
 
-        // Delete a task by ID for the current user
+        // Delete a task
         public async Task DeleteAsync(string id)
         {
             var userId = GetUserIdFromClaims();
@@ -61,11 +79,9 @@ namespace Organizer.Server.Services
             }
         }
 
-        // Helper method to extract the userId from the JWT token
         private string? GetUserIdFromClaims()
         {
-            var userId = _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
-            return userId;
+            return _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
         }
     }
 }

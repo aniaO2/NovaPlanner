@@ -1,0 +1,29 @@
+.dashboard-page {
+    min-height: 100vh;
+    background: linear-gradient(to bottom right, #c2f0f7, #eaf9ff);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.tabs-container {
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 20px;
+}
+
+.task-list .list-group-item {
+    background: rgba(255, 255, 255, 0.6);
+    border: none;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    backdrop-filter: blur(4px);
+}
+
+.glass-card {
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 20px;
+    border: none;
+    box-shadow: 0 4px 20px rgba(0, 150, 255, 0.2);
+}
+
+.tab-content {
+    margin-top: 1rem;
+}

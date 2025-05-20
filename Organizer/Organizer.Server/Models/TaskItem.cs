@@ -11,8 +11,6 @@ namespace Organizer.Server.Models
 
         [BsonElement("userId")]
         public string UserId { get; set; } = string.Empty;
-        [BsonElement("listId")]
-        public string ListId { get; set; } = string.Empty;
 
         [BsonElement("title")]
         public string Title { get; set; } = string.Empty;
@@ -20,5 +18,17 @@ namespace Organizer.Server.Models
         [BsonElement("isCompleted")]
         public bool IsCompleted { get; set; } = false;
         public DateTime DueDate { get; set; }
+
+        [BsonElement("type")]
+        public string Type { get; set; } = "todo"; // Possible values: "todo", "daily", "goal"
+
+        // Optional: Add specific fields only relevant to certain types
+        [BsonElement("streak")]
+        [BsonIgnoreIfNull]
+        public int? Streak { get; set; }
+
+        [BsonElement("progress")]
+        [BsonIgnoreIfNull]
+        public int? Progress { get; set; }
     }
 }

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import UserService from '../api/UserService';
-import Register from './Register';
+import '../styles/Login.css';
 
 const Login = () => {
     const [username, setUsername] = useState('');
@@ -25,31 +25,35 @@ const Login = () => {
         };
 
     return (
-        <div>
-            <h2>Login</h2>
-            {error && <div style={{ color: 'red' }}>{error}</div>}
-            <form onSubmit={handleLogin}>
-                <div>
-                    <label>Username</label>
-                    <input
-                        type="text"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        required
-                    />
-                </div>
-                <div>
-                    <label>Password</label>
-                    <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
-                </div>
-                <button type="submit">Login</button>
-                <button onClick={goToRegister}>Register</button>
-            </form>
+        <div className="login-container">
+            <div className="login-card">
+                <h2 className="login-title">Login</h2>
+                {error && <div className="error-message">{error}</div>}
+                <form onSubmit={handleLogin}>
+                    <div className="form-group">
+                        <label>Username</label>
+                        <input
+                            type="text"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <div className="form-group">
+                        <label>Password</label>
+                        <input
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <div className="button-group">
+                        <button type="submit" className="btn-primary">Login</button>
+                        <button onClick={goToRegister} className="btn-secondary">Register</button>
+                    </div>
+                </form>
+            </div>
         </div>
     );
 };

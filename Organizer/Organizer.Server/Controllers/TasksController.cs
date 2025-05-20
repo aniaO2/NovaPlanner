@@ -7,7 +7,7 @@ namespace Organizer.Server.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]  // Add this to enforce authentication for all actions
+    [Authorize]
     public class TasksController : ControllerBase
     {
         private readonly TaskService _taskService;
@@ -17,7 +17,7 @@ namespace Organizer.Server.Controllers
             _taskService = taskService;
         }
 
-        // Get all tasks for the currently logged-in user
+        // GET: api/tasks
         [HttpGet]
         public async Task<ActionResult<List<TaskItem>>> Get()
         {
@@ -25,7 +25,21 @@ namespace Organizer.Server.Controllers
             return Ok(tasks);
         }
 
-        // Create a new task for the currently logged-in user
+        // GET: api/tasks/type/{type}
+        [HttpGet("type/{type}")]
+        public async Task<ActionResult<List<TaskItem>>> GetByType(string type)
+        {
+            var validTypes = new[] { "todo", "daily", "goal" };
+            if (!validTypes.Contains(type.ToLower()))
+            {
+                return BadRequest("Invalid task type.");
+            }
+
+            var tasks = await _taskService.GetByTypeAsync(type.ToLower());
+            return Ok(tasks);
+        }
+
+        // POST: api/tasks
         [HttpPost]
         public async Task<ActionResult<TaskItem>> Post(TaskItem newTask)
         {
@@ -33,20 +47,20 @@ namespace Organizer.Server.Controllers
             return CreatedAtAction(nameof(Get), new { id = newTask.Id }, newTask);
         }
 
-        // Update an existing task
+        // PUT: api/tasks/{id}
         [HttpPut("{id}")]
-        public async Task<ActionResult> Put(string id, TaskItem updatedTask)
+        public async Task<IActionResult> Put(string id, TaskItem updatedTask)
         {
             await _taskService.UpdateAsync(id, updatedTask);
-            return NoContent();  // Returns 204 No Content when successfully updated
+            return NoContent();
         }
 
-        // Delete a task by ID
+        // DELETE: api/tasks/{id}
         [HttpDelete("{id}")]
-        public async Task<ActionResult> Delete(string id)
+        public async Task<IActionResult> Delete(string id)
         {
             await _taskService.DeleteAsync(id);
-            return NoContent();  // Returns 204 No Content when successfully deleted
+            return NoContent();
         }
     }
 }

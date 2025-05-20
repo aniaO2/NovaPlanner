@@ -1,0 +1,98 @@
+/* login.css */
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(to bottom, #a8e0ff, #8ee3f5, #70cad1);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-card {
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    padding: 40px;
+    max-width: 400px;
+    width: 100%;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.login-title {
+    text-align: center;
+    font-size: 28px;
+    color: #007acc;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+    .form-group label {
+        margin-bottom: 8px;
+        color: #333;
+        font-weight: bold;
+    }
+
+    .form-group input {
+        padding: 10px;
+        background-color: #c9eeff;
+        border-radius: 8px;
+        border: 1px solid #84cdec;
+        font-size: 16px;
+        transition: border-color 0.3s;
+    }
+
+        .form-group input:focus {
+            border-color: #007acc;
+            outline: none;
+        }
+
+.button-group {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.btn-primary, .btn-secondary {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+}
+
+.btn-primary {
+    background: linear-gradient(to right, #00c6ff, #0072ff);
+    color: white;
+}
+
+.btn-secondary {
+    background: linear-gradient(to right, #ffffff, #d9f1ff);
+    color: #007acc;
+    border: 1px solid #007acc;
+}
+
+    .btn-primary:hover, .btn-secondary:hover {
+        transform: translateY(-2px);
+    }
+
+.error-message {
+    color: red;
+    margin-bottom: 15px;
+    text-align: center;
+}
