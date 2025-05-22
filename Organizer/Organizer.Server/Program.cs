@@ -38,7 +38,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = false,
             ValidateLifetime = true,
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Secret"] ?? "default_fallback_key"))
+                Encoding.ASCII.GetBytes(builder.Configuration["JwtSettings:Secret"] ?? "default_fallback_key"))
         };
     });
 

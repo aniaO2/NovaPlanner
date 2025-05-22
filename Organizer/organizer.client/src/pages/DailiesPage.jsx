@@ -1,15 +1,10 @@
 ﻿import React from 'react';
-import { ListGroup, Spinner, Alert } from 'react-bootstrap';
-import TasksByType from '../components/TasksByType';
+import { Spinner, Alert } from 'react-bootstrap';
+import TasksByType from '../hooks/TasksByType';
+import ToDoList from '../components/ToDoList';
 
 const DailiesPage = () => {
     const { tasks, loading } = TasksByType('daily');
-
-    const placeholderTasks = [
-        { id: '1', title: 'Drink water', streak: 3 },
-        { id: '2', title: 'Exercise', streak: 1 },
-        { id: '3', title: 'Read 10 pages', streak: 5 }
-    ];
 
     return (
         <>
@@ -22,26 +17,11 @@ const DailiesPage = () => {
             ) : (
                 <>
                     {Array.isArray(tasks) && tasks.length > 0 ? (
-                        <ListGroup>
-                            {tasks.map(task => (
-                                <ListGroup.Item key={task.id}>
-                                    <strong>{task.title}</strong> — Streak: {task.streak ?? 0}
-                                </ListGroup.Item>
-                            ))}
-                        </ListGroup>
+                        <ToDoList name="Your Daily Tasks" tasks={tasks} type="daily" />
                     ) : (
-                        <>
-                            <Alert variant="info" className="text-center">
-                                No daily tasks yet. Here are some examples!
-                            </Alert>
-                            <ListGroup>
-                                {placeholderTasks.map(task => (
-                                    <ListGroup.Item key={task.id}>
-                                        <strong>{task.title}</strong> — Streak: {task.streak}
-                                    </ListGroup.Item>
-                                ))}
-                            </ListGroup>
-                        </>
+                        <Alert variant="info" className="text-center">
+                            No daily tasks found.
+                        </Alert>
                     )}
                 </>
             )}

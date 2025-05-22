@@ -20,21 +20,14 @@ namespace Organizer.Server.Services
         }
 
         // Get all tasks for the current user
-        public async Task<List<TaskItem>> GetByUserAsync()
+        public async Task<List<TaskItem>> GetByUserAsync(string userId)
         {
-            var userId = GetUserIdFromClaims();
-            if (userId == null)
-                return new List<TaskItem>();
-
             return await _tasks.Find(t => t.UserId == userId).ToListAsync();
         }
 
         // Get tasks filtered by type
-        public async Task<List<TaskItem>> GetByTypeAsync(string type)
+        public async Task<List<TaskItem>> GetByTypeAsync(string userId, string type)
         {
-            var userId = GetUserIdFromClaims();
-            if (userId == null)
-                return new List<TaskItem>();
 
             return await _tasks.Find(t => t.UserId == userId && t.Type == type).ToListAsync();
         }

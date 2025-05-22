@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import axios from '../api/AxiosInstance';
 
 const TasksByType = (type) => {
     const [tasks, setTasks] = useState([]);
@@ -8,14 +8,16 @@ const TasksByType = (type) => {
     useEffect(() => {
         const fetchTasks = async () => {
             try {
-                const res = await axios.get(`/api/tasks/type/${type}`);
-                setTasks(res.data);
+                const response = await axios.get(`/tasks/type/${type}`);
+                setTasks(response.data);
+                console.log('Fetched tasks:', response.data);
             } catch (error) {
-                console.error(`Error loading ${type} tasks`, error);
+                console.error('Error fetching tasks:', error);
             } finally {
                 setLoading(false);
             }
         };
+
         fetchTasks();
     }, [type]);
 

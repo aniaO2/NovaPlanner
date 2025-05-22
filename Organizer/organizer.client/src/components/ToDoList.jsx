@@ -1,12 +1,12 @@
 import React from 'react';
 import TaskItem from './TaskItem';
 
-const ToDoList = ({ list }) => {
+const ToDoList = ({ name, tasks, type }) => {
     return (
-        <div className="task-list">
-            <h3>{list.name}</h3>
-            {list.tasks.map(task => (
-                <TaskItem key={task.id} task={task} />
+        <div className="task-list mb-4">
+            <h4>{name}</h4>
+            {tasks.map(task => (
+                <TaskItem key={task.id} task={task} type={type} />
             ))}
         </div>
     );

@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Organizer.Server.Models;
 using Organizer.Server.Services;
+using System.Security.Claims;
+
 
 namespace Organizer.Server.Controllers
 {
@@ -21,9 +23,11 @@ namespace Organizer.Server.Controllers
         [HttpGet]
         public async Task<ActionResult<List<TaskItem>>> Get()
         {
-            var tasks = await _taskService.GetByUserAsync();
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var tasks = await _taskService.GetByUserAsync(userId);
             return Ok(tasks);
         }
+
 
         // GET: api/tasks/type/{type}
         [HttpGet("type/{type}")]
@@ -35,7 +39,8 @@ namespace Organizer.Server.Controllers
                 return BadRequest("Invalid task type.");
             }
 
-            var tasks = await _taskService.GetByTypeAsync(type.ToLower());
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var tasks = await _taskService.GetByTypeAsync(userId, type.ToLower());
             return Ok(tasks);
         }
 
