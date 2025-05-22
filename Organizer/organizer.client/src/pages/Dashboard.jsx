@@ -1,7 +1,7 @@
-﻿import React, { useState } from 'react';
-import { Card, Button, Container, Form } from 'react-bootstrap';
-import axios from '../api/AxiosInstance';
+﻿import React, { useState} from 'react';
+import { Button, Form, Spinner, Alert } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import axios from '../api/AxiosInstance';
 
 import ToDoPage from './ToDoPage';
 import DailiesPage from './DailiesPage';
@@ -15,14 +15,41 @@ const Dashboard = () => {
     const [showPopup, setShowPopup] = useState(false);
     const navigate = useNavigate();
 
+    const [tasks, setTasks] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
     const [newTask, setNewTask] = useState({
         title: '',
-        type: 'todo',
         isCompleted: false,
         streak: 0,
         progress: 0,
         dueDate: '',
     });
+
+    // Fetch all tasks on mount and whenever tasks change
+    const fetchTasks = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            const response = await axios.get('/tasks'); // Assumes this returns all tasks
+            setTasks(response.data);
+        } catch (err) {
+            setError('Failed to fetch tasks.');
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    React.useEffect(() => {
+        fetchTasks();
+    }, []);
+
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        navigate('/');
+    };
 
     const togglePopup = () => setShowPopup(prev => !prev);
 
@@ -39,78 +66,108 @@ const Dashboard = () => {
 
         const payload = {
             ...newTask,
+            type: activeView === 'dailies' ? 'daily' : 'goal', 
             dueDate: newTask.dueDate ? new Date(newTask.dueDate) : new Date(),
-            streak: newTask.type === 'daily' ? Number(newTask.streak) : null,
-            progress: newTask.type === 'goal' ? Number(newTask.progress) : null,
+            streak: activeView === 'dailies' ? Number(newTask.streak) : null,
+            progress: activeView === 'goals' ? Number(newTask.progress) : null,
         };
 
         try {
             await axios.post('/tasks', payload);
             togglePopup();
-            window.location.reload(); // Ideally refresh via state
+            setNewTask({
+                title: '',
+                isCompleted: false,
+                streak: 0,
+                progress: 0,
+                dueDate: '',
+            });
+            await fetchTasks(); // Re-fetch tasks to update state without reload
         } catch (error) {
             console.error('Failed to add task:', error);
         }
     };
 
-    const handleLogout = () => {
-        // Clear auth token or session
-        localStorage.removeItem('token'); // or whatever storage you use
-        navigate('/');
+    // Filter tasks by type for passing to children
+    const filteredTasks = {
+        todo: tasks.filter(task => task.type === 'todo'),
+        daily: tasks.filter(task => task.type === 'daily'),
+        goal: tasks.filter(task => task.type === 'goal'),
     };
 
     return (
-        <div className="dashboard-page">
-            <Container className="py-5">
-                <div className="d-flex justify-content-between align-items-center mb-4">
-                    <div>
-                        <h1 className="mb-2">Welcome Back!</h1>
-                        <p>Here's a snapshot of your day.</p>
-                    </div>
-                    <div className="d-flex gap-2">
-                        <Button variant="success" onClick={togglePopup}>➕ Add Task</Button>
-                        <Button variant="outline-danger" onClick={handleLogout}>🔓 Logout</Button>
-                    </div>
-                </div>
-
-                <div className="text-center mb-4">
-                    <Button
-                        variant={activeView === 'todo' ? 'primary' : 'outline-primary'}
+        <div className="dashboard-container">
+            <header className="topbar">
+                <h3 className="logo">NovaPlanner</h3>
+                <nav className="top-nav-links">
+                    <button
                         onClick={() => setActiveView('todo')}
-                        className="mx-2"
+                        className={activeView === 'todo' ? 'active' : ''}
                     >
-                        To-Do
-                    </Button>
-                    <Button
-                        variant={activeView === 'dailies' ? 'primary' : 'outline-primary'}
+                        📋 To-Do
+                    </button>
+                    <button
                         onClick={() => setActiveView('dailies')}
-                        className="mx-2"
+                        className={activeView === 'dailies' ? 'active' : ''}
                     >
-                        Dailies
-                    </Button>
-                    <Button
-                        variant={activeView === 'goals' ? 'primary' : 'outline-primary'}
+                        📅 Dailies
+                    </button>
+                    <button
                         onClick={() => setActiveView('goals')}
-                        className="mx-2"
+                        className={activeView === 'goals' ? 'active' : ''}
                     >
-                        Goals
+                        🎯 Goals
+                    </button>
+                </nav>
+                <Button variant="outline-danger" onClick={handleLogout} className="logout-btn">
+                    🔓
+                </Button>
+            </header>
+
+            <main className="main-content">
+                <div className="header">
+                    <h2>
+                        {activeView === 'todo'
+                            ? 'To-Do Tasks'
+                            : activeView === 'dailies'
+                                ? 'Dailies'
+                                : 'Goals'}
+                    </h2>
+                    <Button variant="success" onClick={togglePopup}>
+                        ➕ New Task
                     </Button>
                 </div>
 
-                <Card className="glass-card shadow p-4">
-                    {activeView === 'todo' && <ToDoPage />}
-                    {activeView === 'dailies' && <DailiesPage />}
-                    {activeView === 'goals' && <GoalsPage />}
-                </Card>
-            </Container>
+                <div className="task-columns">
+                    {loading && (
+                        <div className="d-flex justify-content-center my-4">
+                            <Spinner animation="border" />
+                        </div>
+                    )}
+                    {error && <Alert variant="danger">{error}</Alert>}
 
+                    {!loading && !error && activeView === 'todo' && (
+                        <ToDoPage tasks={filteredTasks.todo} />
+                    )}
+                    {!loading && !error && activeView === 'dailies' && (
+                        <DailiesPage tasks={filteredTasks.daily} />
+                    )}
+                    {!loading && !error && activeView === 'goals' && (
+                        <GoalsPage tasks={filteredTasks.goal} />
+                    )}
+                </div>
+            </main>
+
+            {/* Popup Modal */}
             {showPopup && (
                 <div className="popup-overlay">
                     <div className="popup">
-                        <button className="popup-close" onClick={togglePopup}>✖</button>
+                        <button className="popup-close" onClick={togglePopup}>
+                            ✖
+                        </button>
                         <h4 className="mb-3">Add New Task</h4>
                         <Form onSubmit={handleSubmit}>
-                            <Form.Group className="mb-3" controlId="taskTitle">
+                            <Form.Group className="mb-3">
                                 <Form.Label>Title</Form.Label>
                                 <Form.Control
                                     type="text"
@@ -121,20 +178,7 @@ const Dashboard = () => {
                                 />
                             </Form.Group>
 
-                            <Form.Group className="mb-3" controlId="taskType">
-                                <Form.Label>Type</Form.Label>
-                                <Form.Select
-                                    name="type"
-                                    value={newTask.type}
-                                    onChange={handleChange}
-                                >
-                                    <option value="todo">To-Do</option>
-                                    <option value="daily">Daily</option>
-                                    <option value="goal">Goal</option>
-                                </Form.Select>
-                            </Form.Group>
-
-                            <Form.Group className="mb-3" controlId="dueDate">
+                            <Form.Group className="mb-3">
                                 <Form.Label>Due Date</Form.Label>
                                 <Form.Control
                                     type="date"
@@ -144,34 +188,34 @@ const Dashboard = () => {
                                 />
                             </Form.Group>
 
-                            {newTask.type === 'daily' && (
-                                <Form.Group className="mb-3" controlId="streak">
+                            {activeView === 'dailies' && (
+                                <Form.Group className="mb-3">
                                     <Form.Label>Streak</Form.Label>
                                     <Form.Control
                                         type="number"
                                         name="streak"
-                                        min={0}
                                         value={newTask.streak}
+                                        min={0}
                                         onChange={handleChange}
                                     />
                                 </Form.Group>
                             )}
 
-                            {newTask.type === 'goal' && (
-                                <Form.Group className="mb-3" controlId="progress">
+                            {activeView === 'goals' && (
+                                <Form.Group className="mb-3">
                                     <Form.Label>Progress (%)</Form.Label>
                                     <Form.Control
                                         type="number"
                                         name="progress"
+                                        value={newTask.progress}
                                         min={0}
                                         max={100}
-                                        value={newTask.progress}
                                         onChange={handleChange}
                                     />
                                 </Form.Group>
                             )}
 
-                            <Form.Group className="mb-3" controlId="isCompleted">
+                            <Form.Group className="mb-3">
                                 <Form.Check
                                     type="checkbox"
                                     label="Completed"

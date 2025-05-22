@@ -1,14 +1,10 @@
 ﻿import React from 'react';
 import { Spinner, Alert } from 'react-bootstrap';
-import TasksByType from '../hooks/TasksByType';
-import ToDoList from '../components/ToDoList';
 
-const GoalsPage = () => {
-    const { tasks, loading } = TasksByType('goal');
-
+const GoalsPage = ({ tasks, loading }) => {
     return (
-        <>
-            <h3 className="mb-3 text-center">🎯 Goals</h3>
+        <div className="task-column">
+            <h4 className="text-center mb-3">🎯 Goals</h4>
 
             {loading ? (
                 <div className="d-flex justify-content-center my-4">
@@ -17,7 +13,15 @@ const GoalsPage = () => {
             ) : (
                 <>
                     {Array.isArray(tasks) && tasks.length > 0 ? (
-                        <ToDoList name="Your Goals" tasks={tasks} type="goal" />
+                        tasks.map(task => (
+                            <div className="task-card" key={task._id}>
+                                <p className="task-title">{task.title}</p>
+                                <div className="task-actions">
+                                    <button className="edit-btn">✏️</button>
+                                    <button className="delete-btn">🗑️</button>
+                                </div>
+                            </div>
+                        ))
                     ) : (
                         <Alert variant="info" className="text-center">
                             No goals found.
@@ -25,7 +29,7 @@ const GoalsPage = () => {
                     )}
                 </>
             )}
-        </>
+        </div>
     );
 };
 

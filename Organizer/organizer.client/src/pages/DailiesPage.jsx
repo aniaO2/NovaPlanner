@@ -1,14 +1,10 @@
 ﻿import React from 'react';
 import { Spinner, Alert } from 'react-bootstrap';
-import TasksByType from '../hooks/TasksByType';
-import ToDoList from '../components/ToDoList';
 
-const DailiesPage = () => {
-    const { tasks, loading } = TasksByType('daily');
-
+const DailiesPage = ({ tasks, loading }) => {
     return (
-        <>
-            <h3 className="mb-3 text-center">📆 Daily Tasks</h3>
+        <div className="task-column">
+            <h4 className="text-center mb-3">📆 Daily Tasks</h4>
 
             {loading ? (
                 <div className="d-flex justify-content-center my-4">
@@ -17,7 +13,15 @@ const DailiesPage = () => {
             ) : (
                 <>
                     {Array.isArray(tasks) && tasks.length > 0 ? (
-                        <ToDoList name="Your Daily Tasks" tasks={tasks} type="daily" />
+                        tasks.map(task => (
+                            <div className="task-card" key={task._id}>
+                                <p className="task-title">{task.title}</p>
+                                <div className="task-actions">
+                                    <button className="edit-btn">✏️</button>
+                                    <button className="delete-btn">🗑️</button>
+                                </div>
+                            </div>
+                        ))
                     ) : (
                         <Alert variant="info" className="text-center">
                             No daily tasks found.
@@ -25,7 +29,7 @@ const DailiesPage = () => {
                     )}
                 </>
             )}
-        </>
+        </div>
     );
 };
 

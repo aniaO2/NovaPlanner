@@ -1,29 +1,84 @@
-.dashboard-page {
-    min-height: 100vh;
-    background: linear-gradient(to bottom right, #c2f0f7, #eaf9ff);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+.dashboard-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
 }
 
-.tabs-container {
-    background: rgba(255, 255, 255, 0.8);
-    border-radius: 20px;
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 1rem;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
 }
 
-.task-list .list-group-item {
-    background: rgba(255, 255, 255, 0.6);
-    border: none;
-    border-radius: 12px;
-    margin-bottom: 10px;
-    backdrop-filter: blur(4px);
+.logo {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-right: 1rem;
 }
 
-.glass-card {
-    background: rgba(255, 255, 255, 0.7);
-    border-radius: 20px;
-    border: none;
-    box-shadow: 0 4px 20px rgba(0, 150, 255, 0.2);
+.top-nav-links {
+    display: flex;
+    gap: 1rem;
+    flex-grow: 1;
+    justify-content: center;
 }
 
-.tab-content {
-    margin-top: 1rem;
+    .top-nav-links button {
+        background: none;
+        border: none;
+        font-size: 1rem;
+        cursor: pointer;
+        padding: 0.5rem 1rem;
+        transition: background-color 0.2s;
+    }
+
+        .top-nav-links button:hover {
+            background-color: #e2e6ea;
+            border-radius: 4px;
+        }
+
+.logout-btn {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.75rem;
 }
+
+.main-content {
+    flex: 1;
+    padding: 1rem;
+    overflow-y: auto;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.task-columns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.task-column {
+    background: #f8f9fc;
+    border-radius: 10px;
+    padding: 1rem;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.task-card {
+    background: white;
+    padding: 0.75rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
