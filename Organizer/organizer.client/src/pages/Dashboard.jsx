@@ -1,4 +1,4 @@
-﻿import React, { useState} from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Button, Form, Spinner, Alert } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import axios from '../api/AxiosInstance';
@@ -19,7 +19,8 @@ const Dashboard = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const [newTask, setNewTask] = useState({
+    // To hold the new task data OR the task being edited
+    const [currentTask, setCurrentTask] = useState({
         title: '',
         isCompleted: false,
         streak: 0,
@@ -27,13 +28,20 @@ const Dashboard = () => {
         dueDate: '',
     });
 
-    // Fetch all tasks on mount and whenever tasks change
+    // Track whether popup is for editing or adding new
+    const [isEditing, setIsEditing] = useState(false);
+
+    // Fetch all tasks
     const fetchTasks = async () => {
         setLoading(true);
         setError(null);
         try {
-            const response = await axios.get('/tasks'); // Assumes this returns all tasks
-            setTasks(response.data);
+            const response = await axios.get('/tasks');
+            const normalized = response.data.map(task => ({
+                ...task,
+                _id: task.id, // ensure _id is available
+            }));
+            setTasks(normalized);
         } catch (err) {
             setError('Failed to fetch tasks.');
             console.error(err);
@@ -42,7 +50,8 @@ const Dashboard = () => {
         }
     };
 
-    React.useEffect(() => {
+
+    useEffect(() => {
         fetchTasks();
     }, []);
 
@@ -53,9 +62,35 @@ const Dashboard = () => {
 
     const togglePopup = () => setShowPopup(prev => !prev);
 
+    // Open popup for adding new task
+    const openAddPopup = () => {
+        setIsEditing(false);
+        setCurrentTask({
+            title: '',
+            isCompleted: false,
+            streak: 0,
+            progress: 0,
+            dueDate: '',
+        });
+        togglePopup();
+    };
+
+    // Open popup for editing existing task
+    const openEditPopup = (task) => {
+        setIsEditing(true);
+        setActiveView(task.type === 'daily' ? 'dailies' : task.type === 'goal' ? 'goals' : 'todo');
+        setCurrentTask({
+            ...task,
+            dueDate: task.dueDate ? new Date(task.dueDate).toISOString().substring(0, 10) : '',
+            streak: task.streak ?? 0,
+            progress: task.progress ?? 0,
+        });
+        togglePopup();
+    };
+
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
-        setNewTask(prev => ({
+        setCurrentTask(prev => ({
             ...prev,
             [name]: type === 'checkbox' ? checked : value,
         }));
@@ -64,58 +99,85 @@ const Dashboard = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        // Normalize payload
         const payload = {
-            ...newTask,
-            type: activeView === 'dailies' ? 'daily' : 'goal', 
-            dueDate: newTask.dueDate ? new Date(newTask.dueDate) : new Date(),
-            streak: activeView === 'dailies' ? Number(newTask.streak) : null,
-            progress: activeView === 'goals' ? Number(newTask.progress) : null,
+            ...currentTask,
+            type: activeView === 'dailies' ? 'daily' : activeView === 'goals' ? 'goal' : 'todo',
+            dueDate: currentTask.dueDate ? new Date(currentTask.dueDate) : new Date(),
+            streak: activeView === 'dailies' ? Number(currentTask.streak) : null,
+            progress: activeView === 'goals' ? Number(currentTask.progress) : null,
         };
 
         try {
-            await axios.post('/tasks', payload);
+            if (isEditing) {
+                // PUT update existing
+                await axios.put(`/tasks/${currentTask._id}`, payload);
+            } else {
+                // POST new
+                await axios.post('/tasks', payload);
+            }
             togglePopup();
-            setNewTask({
+            setCurrentTask({
                 title: '',
                 isCompleted: false,
                 streak: 0,
                 progress: 0,
                 dueDate: '',
             });
-            await fetchTasks(); // Re-fetch tasks to update state without reload
+            await fetchTasks();
         } catch (error) {
-            console.error('Failed to add task:', error);
+            console.error('Failed to save task:', error);
         }
     };
 
-    // Filter tasks by type for passing to children
+    const handleDelete = async (taskId) => {
+        if (!window.confirm('Are you sure you want to delete this task?')) return;
+
+        try {
+            await axios.delete(`/tasks/${taskId}`);
+            await fetchTasks();
+        } catch (error) {
+            console.error('Failed to delete task:', error);
+        }
+    };
+
+    // Filter tasks by type
     const filteredTasks = {
         todo: tasks.filter(task => task.type === 'todo'),
         daily: tasks.filter(task => task.type === 'daily'),
         goal: tasks.filter(task => task.type === 'goal'),
     };
 
+    // Render task cards with Edit/Delete buttons
+    const renderTasksWithControls = (tasksArray) =>
+        tasksArray.map(task => (
+            <div key={task._id} className="task-card">
+                <h5>{task.title}</h5>
+                {activeView === 'dailies' && <p>Streak: {task.streak}</p>}
+                {activeView === 'goals' && <p>Progress: {task.progress}%</p>}
+                <p>Due: {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'N/A'}</p>
+                <p>Status: {task.isCompleted ? 'Completed' : 'Pending'}</p>
+                <Button variant="outline-primary" size="sm" onClick={() => openEditPopup(task)}>
+                    ✏️ Edit
+                </Button>{' '}
+                <Button variant="outline-danger" size="sm" onClick={() => handleDelete(task._id)}>
+                    🗑️ Delete
+                </Button>
+            </div>
+        ));
+
     return (
         <div className="dashboard-container">
             <header className="topbar">
                 <h3 className="logo">NovaPlanner</h3>
                 <nav className="top-nav-links">
-                    <button
-                        onClick={() => setActiveView('todo')}
-                        className={activeView === 'todo' ? 'active' : ''}
-                    >
+                    <button onClick={() => setActiveView('todo')} className={activeView === 'todo' ? 'active' : ''}>
                         📋 To-Do
                     </button>
-                    <button
-                        onClick={() => setActiveView('dailies')}
-                        className={activeView === 'dailies' ? 'active' : ''}
-                    >
+                    <button onClick={() => setActiveView('dailies')} className={activeView === 'dailies' ? 'active' : ''}>
                         📅 Dailies
                     </button>
-                    <button
-                        onClick={() => setActiveView('goals')}
-                        className={activeView === 'goals' ? 'active' : ''}
-                    >
+                    <button onClick={() => setActiveView('goals')} className={activeView === 'goals' ? 'active' : ''}>
                         🎯 Goals
                     </button>
                 </nav>
@@ -133,7 +195,7 @@ const Dashboard = () => {
                                 ? 'Dailies'
                                 : 'Goals'}
                     </h2>
-                    <Button variant="success" onClick={togglePopup}>
+                    <Button variant="success" onClick={openAddPopup}>
                         ➕ New Task
                     </Button>
                 </div>
@@ -146,15 +208,9 @@ const Dashboard = () => {
                     )}
                     {error && <Alert variant="danger">{error}</Alert>}
 
-                    {!loading && !error && activeView === 'todo' && (
-                        <ToDoPage tasks={filteredTasks.todo} />
-                    )}
-                    {!loading && !error && activeView === 'dailies' && (
-                        <DailiesPage tasks={filteredTasks.daily} />
-                    )}
-                    {!loading && !error && activeView === 'goals' && (
-                        <GoalsPage tasks={filteredTasks.goal} />
-                    )}
+                    {!loading && !error && activeView === 'todo' && renderTasksWithControls(filteredTasks.todo)}
+                    {!loading && !error && activeView === 'dailies' && renderTasksWithControls(filteredTasks.daily)}
+                    {!loading && !error && activeView === 'goals' && renderTasksWithControls(filteredTasks.goal)}
                 </div>
             </main>
 
@@ -162,17 +218,15 @@ const Dashboard = () => {
             {showPopup && (
                 <div className="popup-overlay">
                     <div className="popup">
-                        <button className="popup-close" onClick={togglePopup}>
-                            ✖
-                        </button>
-                        <h4 className="mb-3">Add New Task</h4>
+                        <button className="popup-close" onClick={togglePopup}>✖</button>
+                        <h4 className="mb-3">{isEditing ? 'Edit Task' : 'Add New Task'}</h4>
                         <Form onSubmit={handleSubmit}>
                             <Form.Group className="mb-3">
                                 <Form.Label>Title</Form.Label>
                                 <Form.Control
                                     type="text"
                                     name="title"
-                                    value={newTask.title}
+                                    value={currentTask.title}
                                     onChange={handleChange}
                                     required
                                 />
@@ -183,7 +237,7 @@ const Dashboard = () => {
                                 <Form.Control
                                     type="date"
                                     name="dueDate"
-                                    value={newTask.dueDate}
+                                    value={currentTask.dueDate}
                                     onChange={handleChange}
                                 />
                             </Form.Group>
@@ -194,7 +248,7 @@ const Dashboard = () => {
                                     <Form.Control
                                         type="number"
                                         name="streak"
-                                        value={newTask.streak}
+                                        value={currentTask.streak}
                                         min={0}
                                         onChange={handleChange}
                                     />
@@ -207,7 +261,7 @@ const Dashboard = () => {
                                     <Form.Control
                                         type="number"
                                         name="progress"
-                                        value={newTask.progress}
+                                        value={currentTask.progress}
                                         min={0}
                                         max={100}
                                         onChange={handleChange}
@@ -220,13 +274,13 @@ const Dashboard = () => {
                                     type="checkbox"
                                     label="Completed"
                                     name="isCompleted"
-                                    checked={newTask.isCompleted}
+                                    checked={currentTask.isCompleted}
                                     onChange={handleChange}
                                 />
                             </Form.Group>
 
                             <Button type="submit" variant="primary" className="w-100">
-                                Add Task
+                                {isEditing ? 'Save Changes' : 'Add Task'}
                             </Button>
                         </Form>
                     </div>

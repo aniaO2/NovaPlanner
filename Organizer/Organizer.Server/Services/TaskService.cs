@@ -1,8 +1,7 @@
-﻿using MongoDB.Driver;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
+using MongoDB.Driver;
 using Organizer.Server.Models;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Http;
 
 namespace Organizer.Server.Services
 {
