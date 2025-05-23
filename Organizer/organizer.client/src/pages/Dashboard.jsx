@@ -157,14 +157,17 @@ const Dashboard = () => {
                 {activeView === 'goals' && <p>Progress: {task.progress}%</p>}
                 <p>Due: {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'N/A'}</p>
                 <p>Status: {task.isCompleted ? 'Completed' : 'Pending'}</p>
-                <Button variant="outline-primary" size="sm" onClick={() => openEditPopup(task)}>
-                    ✏️ Edit
-                </Button>{' '}
-                <Button variant="outline-danger" size="sm" onClick={() => handleDelete(task._id)}>
-                    🗑️ Delete
-                </Button>
+                <div className="">
+                    <Button variant="outline-primary" size="sm" onClick={() => openEditPopup(task)}>
+                        ✏️ Edit
+                    </Button>
+                    <Button variant="outline-danger" size="sm" onClick={() => handleDelete(task._id)}>
+                        🗑️ Delete
+                    </Button>
+                </div>
             </div>
         ));
+
 
     return (
         <div className="dashboard-container">
@@ -202,7 +205,7 @@ const Dashboard = () => {
 
                 <div className="task-columns">
                     {loading && (
-                        <div className="d-flex justify-content-center my-4">
+                        <div className="d-flex  my-4">
                             <Spinner animation="border" />
                         </div>
                     )}

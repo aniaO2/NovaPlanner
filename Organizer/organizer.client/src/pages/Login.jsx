@@ -25,6 +25,7 @@ const Login = () => {
         };
 
     return (
+        <div className="wrapper">
         <div className="login-container">
             <div className="login-card">
                 <h2 className="login-title">Login</h2>
@@ -53,6 +54,7 @@ const Login = () => {
                         <button onClick={goToRegister} className="btn-secondary">Register</button>
                     </div>
                 </form>
+            </div>
             </div>
         </div>
     );

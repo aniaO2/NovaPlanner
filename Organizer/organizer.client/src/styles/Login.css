@@ -4,6 +4,10 @@ body {
     margin: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: linear-gradient(to bottom, #a8e0ff, #8ee3f5, #70cad1);
+
+}
+
+.wrapper {
     height: 100vh;
     display: flex;
     justify-content: center;

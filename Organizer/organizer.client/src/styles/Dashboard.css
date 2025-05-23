@@ -1,84 +1,118 @@
-.dashboard-container {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-}
-
+/* Topbar */
 .topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.5rem 1rem;
-    background-color: #f8f9fa;
-    border-bottom: 1px solid #dee2e6;
+    padding: 0 1.0rem;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.4), rgba(200, 235, 255, 0.4));
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 0 0 12px 12px;
+    z-index: 1000;
 }
 
+.main-content {
+    padding-top: 2.5rem; /* match or exceed the topbar height */
+}
+
+
+
+/* Logo */
 .logo {
-    font-size: 1.25rem;
-    font-weight: bold;
-    margin-right: 1rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #004e92;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
 }
 
+/* Top Navigation Tabs */
 .top-nav-links {
     display: flex;
-    gap: 1rem;
+    gap: 1.5rem;
     flex-grow: 1;
     justify-content: center;
 }
 
     .top-nav-links button {
-        background: none;
+        background: rgba(255, 255, 255, 0.25);
         border: none;
         font-size: 1rem;
+        font-weight: 500;
+        color: #004e92;
+        padding: 0.5rem 1.25rem;
+        border-radius: 20px;
         cursor: pointer;
-        padding: 0.5rem 1rem;
-        transition: background-color 0.2s;
+        transition: all 0.3s ease;
+        box-shadow: inset 0 0 0 rgba(255,255,255,0.1);
     }
 
         .top-nav-links button:hover {
-            background-color: #e2e6ea;
-            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.6);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
+        .top-nav-links button.active {
+            background: #ffffff;
+            color: #0077cc;
+            font-weight: bold;
+            border: 2px solid #0077cc;
+        }
+
+/* Logout Button */
 .logout-btn {
     font-size: 0.9rem;
     padding: 0.4rem 0.75rem;
+    background-color: rgba(255, 99, 71, 0.9);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    margin-right: 1.5rem;
+    transition: background-color 0.3s ease;
 }
 
-.main-content {
-    flex: 1;
-    padding: 1rem;
-    overflow-y: auto;
-}
+    .logout-btn:hover {
+        background-color: tomato;
+    }
 
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-}
-
+/* Task Cards (Better contrast) */
 .task-columns {
     display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
+    flex-direction: column; /* or row if you want horizontal alignment */
+    align-items: flex-start; /* Aligns to the left */
+    padding: 2rem;
+    gap: 1.5rem;
 }
 
-.task-column {
-    background: #f8f9fc;
-    border-radius: 10px;
-    padding: 1rem;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
+/* Make cards longer and thinner */
 .task-card {
-    background: white;
-    padding: 0.75rem;
-    border-radius: 8px;
-    margin-bottom: 1rem;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    width: 100%;
+    height: 15rem;
+    padding: 0.5rem;
+    background: linear-gradient(145deg, #f4f9aa, #e2f46b);
+    border-radius: 20px;
+    box-shadow: 0 8px 24px rgba(0, 100, 200, 0.15);
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    gap: 0.5rem;
+    color: #3a4600;
 }
+
+    /* Improve layout of buttons inside cards */
+    .task-card .actions {
+        gap: 1rem;
+        margin-top: 0.5rem;
+    }
+
+    /* Adjust button size */
+    .task-card button {
+        min-width: 90px;
+        padding: 0.4rem 0.75rem;
+        font-weight: 600;
+    }
 

@@ -21,6 +21,7 @@ const Register = () => {
     };
 
     return (
+        <div className="wrapper">
         <div className="register-container">
             <div className="register-card">
                 <h2 className="register-title">Create Account</h2>
@@ -62,6 +63,7 @@ const Register = () => {
                 <p className="register-footer">
                     Already have an account? <a href="/">Login</a>
                 </p>
+            </div>
             </div>
         </div>
     );

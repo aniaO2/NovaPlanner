@@ -4,6 +4,16 @@
     padding: 0;
 }
 
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    background: linear-gradient(to bottom, #e0f7ff, #ffffff);
+    color: #333;
+}
+
 th, td {
     padding-left: 1rem;
     padding-right: 1rem;
