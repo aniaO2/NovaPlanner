@@ -55,7 +55,7 @@ const Dashboard = () => {
 
     const handleLogout = () => {
         localStorage.removeItem('token');
-        navigate('/');
+        navigate('/', {replace: true});
     };
 
     const togglePopup = () => setShowPopup(prev => !prev);

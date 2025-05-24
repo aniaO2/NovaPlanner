@@ -28,7 +28,7 @@ namespace Organizer.Server.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            var token = await _userService.LoginAsync(request.Username, request.Password);
+            var token = await _userService.LoginAsync(request.Identifier, request.Password);
             if (token == null)
             {
                 return Unauthorized("Invalid credentials.");
@@ -51,7 +51,7 @@ namespace Organizer.Server.Controllers
 
         public class LoginRequest
         {
-            public string Username { get; set; } = string.Empty;
+            public string Identifier { get; set; } = string.Empty;
             public string Password { get; set; } = string.Empty;
         }
     }

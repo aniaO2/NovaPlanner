@@ -4,7 +4,7 @@ import UserService from '../api/UserService';
 import '../styles/Login.css';
 
 const Login = () => {
-    const [username, setUsername] = useState('');
+    const [identifier, setIdentifier] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState(null);
     const navigate = useNavigate();
@@ -13,9 +13,9 @@ const Login = () => {
         e.preventDefault();
 
         try {
-            const { token } = await UserService.login(username, password);
+            const { token } = await UserService.login({ identifier, password });
             localStorage.setItem('token', token);
-            navigate('/dashboard');
+            navigate('/dashboard', { replace: true });
         } catch {
             setError('Invalid credentials. Please try again.');
         }
@@ -32,11 +32,11 @@ const Login = () => {
                 {error && <div className="error-message">{error}</div>}
                 <form onSubmit={handleLogin}>
                     <div className="form-group">
-                        <label>Username</label>
+                        <label>Username or E-mail</label>
                         <input
                             type="text"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
+                            value={identifier}
+                            onChange={(e) => setIdentifier(e.target.value)}
                             required
                         />
                     </div>

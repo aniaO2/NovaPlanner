@@ -39,9 +39,9 @@ namespace Organizer.Server.Services
             return true;
         }
 
-        public async Task<string?> LoginAsync(string username, string password)
+        public async Task<string?> LoginAsync(string identifier, string password)
         {
-            var user = await GetByUsernameAsync(username);
+            var user = await _users.Find(u => u.Username == identifier || u.Email == identifier).FirstOrDefaultAsync();
             if (user == null)
                 return null;
 
