@@ -4,14 +4,14 @@ import { useNavigate } from 'react-router-dom';
 import axios from '../api/AxiosInstance';
 
 import ToDoPage from './ToDoPage';
-import DailiesPage from './DailiesPage';
+import HabitsPage from './HabitsPage';
 import GoalsPage from './GoalsPage';
 
 import '../styles/Dashboard.css';
 import '../styles/TaskPopup.css';
 
 const Dashboard = () => {
-    const [activeView, setActiveView] = useState('todo');
+    const [activeView, setActiveView] = useState('dailies');
     const [showPopup, setShowPopup] = useState(false);
     const navigate = useNavigate();
 
@@ -19,7 +19,6 @@ const Dashboard = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // To hold the new task data OR the task being edited
     const [currentTask, setCurrentTask] = useState({
         title: '',
         isCompleted: false,
@@ -28,10 +27,10 @@ const Dashboard = () => {
         dueDate: '',
     });
 
-    // Track whether popup is for editing or adding new
     const [isEditing, setIsEditing] = useState(false);
+    const [menuOpen, setMenuOpen] = useState(false);
+    const [selectedDate, setSelectedDate] = useState(new Date()); 
 
-    // Fetch all tasks
     const fetchTasks = async () => {
         setLoading(true);
         setError(null);
@@ -39,7 +38,7 @@ const Dashboard = () => {
             const response = await axios.get('/tasks');
             const normalized = response.data.map(task => ({
                 ...task,
-                _id: task.id, // ensure _id is available
+                _id: task.id,
             }));
             setTasks(normalized);
         } catch (err) {
@@ -49,7 +48,6 @@ const Dashboard = () => {
             setLoading(false);
         }
     };
-
 
     useEffect(() => {
         fetchTasks();
@@ -61,8 +59,8 @@ const Dashboard = () => {
     };
 
     const togglePopup = () => setShowPopup(prev => !prev);
+    const toggleMenu = () => setMenuOpen(prev => !prev);
 
-    // Open popup for adding new task
     const openAddPopup = () => {
         setIsEditing(false);
         setCurrentTask({
@@ -75,10 +73,17 @@ const Dashboard = () => {
         togglePopup();
     };
 
-    // Open popup for editing existing task
     const openEditPopup = (task) => {
         setIsEditing(true);
-        setActiveView(task.type === 'daily' ? 'dailies' : task.type === 'goal' ? 'goals' : 'todo');
+        setActiveView(
+            task.type === 'habit'
+                ? 'habits'
+                : task.type === 'goal'
+                    ? 'goals'
+                    : task.type === 'daily'
+                        ? 'dailies'
+                        : 'todo'
+        );
         setCurrentTask({
             ...task,
             dueDate: task.dueDate ? new Date(task.dueDate).toISOString().substring(0, 10) : '',
@@ -99,21 +104,22 @@ const Dashboard = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Normalize payload
         const payload = {
             ...currentTask,
-            type: activeView === 'dailies' ? 'daily' : activeView === 'goals' ? 'goal' : 'todo',
+            type:
+                activeView === 'habits' ? 'habit' :
+                activeView === 'goals' ? 'goal' :
+                activeView === 'dailies' ? 'daily' :
+                'todo',
             dueDate: currentTask.dueDate ? new Date(currentTask.dueDate) : new Date(),
-            streak: activeView === 'dailies' ? Number(currentTask.streak) : null,
+            streak: activeView === 'habits' ? Number(currentTask.streak) : null,
             progress: activeView === 'goals' ? Number(currentTask.progress) : null,
         };
 
         try {
             if (isEditing) {
-                // PUT update existing
                 await axios.put(`/tasks/${currentTask._id}`, payload);
             } else {
-                // POST new
                 await axios.post('/tasks', payload);
             }
             togglePopup();
@@ -141,23 +147,26 @@ const Dashboard = () => {
         }
     };
 
-    // Filter tasks by type
     const filteredTasks = {
         todo: tasks.filter(task => task.type === 'todo'),
-        daily: tasks.filter(task => task.type === 'daily'),
+        dailies: tasks.filter(task =>
+            task.type === 'daily' &&
+            new Date(task.dueDate).toDateString() === selectedDate.toDateString()
+        ),
+        habit: tasks.filter(task => task.type === 'habit'),
         goal: tasks.filter(task => task.type === 'goal'),
     };
 
-    // Render task cards with Edit/Delete buttons
+
     const renderTasksWithControls = (tasksArray) =>
         tasksArray.map(task => (
             <div key={task._id} className="task-card">
                 <h5>{task.title}</h5>
-                {activeView === 'dailies' && <p>Streak: {task.streak}</p>}
+                {activeView === 'habits' && <p>Streak: {task.streak}</p>}
                 {activeView === 'goals' && <p>Progress: {task.progress}%</p>}
                 <p>Due: {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'N/A'}</p>
                 <p>Status: {task.isCompleted ? 'Completed' : 'Pending'}</p>
-                <div className="">
+                <div className="actions">
                     <Button variant="outline-primary" size="sm" onClick={() => openEditPopup(task)}>
                         ✏️ Edit
                     </Button>
@@ -168,40 +177,65 @@ const Dashboard = () => {
             </div>
         ));
 
-
     return (
         <div className="dashboard-container">
             <header className="topbar">
                 <h3 className="logo">NovaPlanner</h3>
                 <nav className="top-nav-links">
+                    <button onClick={() => setActiveView('dailies')} className={activeView === 'dailies' ? 'active' : ''}>
+                        🌞 My day
+                    </button>
                     <button onClick={() => setActiveView('todo')} className={activeView === 'todo' ? 'active' : ''}>
                         📋 To-Do
                     </button>
-                    <button onClick={() => setActiveView('dailies')} className={activeView === 'dailies' ? 'active' : ''}>
-                        📅 Dailies
+                    <button onClick={() => setActiveView('habits')} className={activeView === 'habits' ? 'active' : ''}>
+                        📅 Habits
                     </button>
                     <button onClick={() => setActiveView('goals')} className={activeView === 'goals' ? 'active' : ''}>
                         🎯 Goals
                     </button>
                 </nav>
-                <Button variant="outline-danger" onClick={handleLogout} className="logout-btn">
-                    🔓
-                </Button>
+
+                {/* Hamburger Menu */}
+                <div className="hamburger-container">
+                    <button className="hamburger-icon" onClick={toggleMenu}>☰</button>
+                    {menuOpen && (
+                        <div className="hamburger-menu">
+                            <Button variant="outline-secondary" size="sm" className="menu-btn">⚙️ Settings</Button>
+                            <Button variant="outline-danger" size="sm" className="menu-btn" onClick={handleLogout}>
+                                🔓 Logout
+                            </Button>
+                        </div>
+                    )}
+                </div>
             </header>
 
             <main className="main-content">
-                <div className="header">
+                <div className="header d-flex justify-content-between align-items-center">
                     <h2>
                         {activeView === 'todo'
                             ? 'To-Do Tasks'
                             : activeView === 'dailies'
-                                ? 'Dailies'
-                                : 'Goals'}
+                                ? "Today's Tasks"
+                                : activeView === 'habits'
+                                    ? 'Habits'
+                                    : 'Goals'}
                     </h2>
-                    <Button variant="success" onClick={openAddPopup}>
-                        ➕ New Task
-                    </Button>
+
+                    <div className="d-flex align-items-center gap-2">
+                        {activeView === 'dailies' && (
+                            <input
+                                type="date"
+                                value={selectedDate.toISOString().substring(0, 10)}
+                                onChange={(e) => setSelectedDate(new Date(e.target.value))}
+                                className="form-control"
+                                style={{ width: 'auto' }}
+                            />
+                        )}
+                        <Button variant="success" onClick={openAddPopup}>➕ New Task</Button>
+                    </div>
                 </div>
+
 
                 <div className="task-columns">
                     {loading && (
@@ -212,12 +246,12 @@ const Dashboard = () => {
                     {error && <Alert variant="danger">{error}</Alert>}
 
                     {!loading && !error && activeView === 'todo' && renderTasksWithControls(filteredTasks.todo)}
-                    {!loading && !error && activeView === 'dailies' && renderTasksWithControls(filteredTasks.daily)}
+                    {!loading && !error && activeView === 'dailies' && renderTasksWithControls(filteredTasks.dailies)}
+                    {!loading && !error && activeView === 'habits' && renderTasksWithControls(filteredTasks.habit)}
                     {!loading && !error && activeView === 'goals' && renderTasksWithControls(filteredTasks.goal)}
-                </div>
+            </div>
             </main>
 
-            {/* Popup Modal */}
             {showPopup && (
                 <div className="popup-overlay">
                     <div className="popup">
@@ -245,7 +279,7 @@ const Dashboard = () => {
                                 />
                             </Form.Group>
 
-                            {activeView === 'dailies' && (
+                            {activeView === 'habits' && (
                                 <Form.Group className="mb-3">
                                     <Form.Label>Streak</Form.Label>
                                     <Form.Control

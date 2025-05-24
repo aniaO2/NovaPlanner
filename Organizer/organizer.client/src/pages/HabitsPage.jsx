@@ -1,10 +1,10 @@
 ﻿import React from 'react';
 import { Spinner, Alert } from 'react-bootstrap';
 
-const DailiesPage = ({ tasks, loading }) => {
+const HabitsPage = ({ tasks, loading }) => {
     return (
         <div className="task-column">
-            <h4 className="text-center mb-3">📆 Daily Tasks</h4>
+            <h4 className="text-center mb-3">Habits</h4>
 
             {loading ? (
                 <div className="d-flex justify-content-center my-4">
@@ -24,7 +24,7 @@ const DailiesPage = ({ tasks, loading }) => {
                         ))
                     ) : (
                         <Alert variant="info" className="text-center">
-                            No daily tasks found.
+                            No habits found.
                         </Alert>
                     )}
                 </>
@@ -33,4 +33,4 @@ const DailiesPage = ({ tasks, loading }) => {
     );
 };
 
-export default DailiesPage;
+export default HabitsPage;

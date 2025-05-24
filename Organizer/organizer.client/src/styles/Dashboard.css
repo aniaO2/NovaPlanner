@@ -116,3 +116,50 @@
         font-weight: 600;
     }
 
+/* Hamburger Menu */
+.hamburger-container {
+    position: relative;
+    margin-right: 1.5rem;
+}
+
+.hamburger-icon {
+    font-size: 1.6rem;
+    background: none;
+    border: none;
+    color: #004e92;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 6px;
+    transition: background-color 0.3s ease;
+}
+
+    .hamburger-icon:hover {
+        background-color: rgba(0, 78, 146, 0.1);
+    }
+
+.hamburger-menu {
+    position: absolute;
+    top: 2.5rem;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    padding: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    z-index: 1001;
+}
+
+.menu-btn {
+    width: 100%;
+    text-align: left;
+}
+
+/*for calendar*/
+input[type="date"] {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
