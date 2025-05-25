@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Organizer.Server.Services;
+using System.Security.Claims;
 using System.Text.Json.Serialization;
 
 namespace Organizer.Server.Controllers
@@ -37,6 +38,21 @@ namespace Organizer.Server.Controllers
             return Ok(new { Token = token });
         }
 
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+        {
+            // You need to identify the user (e.g., from JWT claims)
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
+                return Unauthorized();
+
+            var result = await _userService.ChangePasswordAsync(userId, request.CurrentPassword, request.NewPassword);
+            if (!result)
+                return BadRequest("Current password is incorrect.");
+
+            return Ok("Password changed successfully.");
+        }
+
         public class RegisterRequest
         {
             [JsonPropertyName("username")]
@@ -49,10 +65,28 @@ namespace Organizer.Server.Controllers
             public string Password { get; set; } = string.Empty;
         }
 
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+        {
+            var result = await _userService.ForgotPasswordAsync(request.Email);
+            return result ? Ok("A new password has been sent to your email.") : NotFound("User with this email not found.");
+        }
+
+        public class ForgotPasswordRequest
+        {
+            public string Email { get; set; } = string.Empty;
+        }
+
         public class LoginRequest
         {
             public string Identifier { get; set; } = string.Empty;
             public string Password { get; set; } = string.Empty;
+        }
+
+        public class ChangePasswordRequest
+        {
+            public string CurrentPassword { get; set; } = string.Empty;
+            public string NewPassword { get; set; } = string.Empty;
         }
     }
 }

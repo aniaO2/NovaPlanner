@@ -9,6 +9,11 @@ const UserService = {
     register: async (username, email, password) => {
         const response = await axios.post('/user/register', {username, email, password});
         return response.data;
+    },
+
+    requestPasswordReset: async (email) => {
+        const response = await axios.post('/user/forgot-password', { email });
+        return response.data;
     }
 };
 

@@ -6,6 +6,8 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using System.Net;
+using System.Net.Mail;
 
 namespace Organizer.Server.Services
 {
@@ -13,12 +15,15 @@ namespace Organizer.Server.Services
     {
         private readonly IMongoCollection<User> _users;
         private readonly string _jwtSecret;
+        private readonly EmailSettings _emailSettings;
 
-        public UserService(IOptions<MongoDBSettings> dbSettings, string jwtSecret)
+
+        public UserService(IOptions<MongoDBSettings> dbSettings, IOptions<EmailSettings> emailSettings, string jwtSecret)
         {
             var client = new MongoClient(dbSettings.Value.ConnectionString);
             var database = client.GetDatabase(dbSettings.Value.DatabaseName);
             _users = database.GetCollection<User>("Users");
+            _emailSettings = emailSettings.Value;
             _jwtSecret = jwtSecret;
         }
 
@@ -76,6 +81,76 @@ namespace Organizer.Server.Services
             var hashedInput = HashPassword(password);
             return hashedInput == storedHash;
         }
+
+        public async Task<bool> ChangePasswordAsync(string userId, string currentPassword, string newPassword)
+        {
+            var user = await _users.Find(u => u.Id == userId).FirstOrDefaultAsync();
+            if (user == null)
+                return false;
+
+            if (!VerifyPassword(currentPassword, user.Password))
+                return false;
+
+            var newHashed = HashPassword(newPassword);
+            var update = Builders<User>.Update.Set(u => u.Password, newHashed);
+
+            var result = await _users.UpdateOneAsync(u => u.Id == userId, update);
+            return result.ModifiedCount == 1;
+        }
+
+
+        public async Task<bool> ForgotPasswordAsync(string email)
+        {
+            var user = await GetByEmailAsync(email);
+            if (user == null)
+                return false;
+
+            // Generate a random new password
+            var newPassword = GenerateRandomPassword();
+            var hashedPassword = HashPassword(newPassword);
+
+            // Update user password in database
+            var update = Builders<User>.Update.Set(u => u.Password, hashedPassword);
+            await _users.UpdateOneAsync(u => u.Id == user.Id, update);
+
+            // Send the new password via email
+            await SendResetPasswordEmail(user.Email, newPassword);
+            return true;
+        }
+
+        private string GenerateRandomPassword(int length = 10)
+        {
+            const string chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+            var random = new Random();
+            return new string(Enumerable.Repeat(chars, length)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
+        }
+
+        private async Task SendResetPasswordEmail(string email, string newPassword)
+        {
+            var fromAddress = new MailAddress(_emailSettings.FromEmail, _emailSettings.FromName);
+            var toAddress = new MailAddress(email);
+            string subject = "NovaPlanner - Password Reset";
+            string body = $"Your new password is: {newPassword}\nPlease log in and change it in your settings.";
+
+            var smtp = new SmtpClient
+            {
+                Host = _emailSettings.SmtpHost,
+                Port = _emailSettings.SmtpPort,
+                EnableSsl = true,
+                DeliveryMethod = SmtpDeliveryMethod.Network,
+                UseDefaultCredentials = false,
+                Credentials = new NetworkCredential(_emailSettings.FromEmail, _emailSettings.Password)
+            };
+
+            using var message = new MailMessage(fromAddress, toAddress)
+            {
+                Subject = subject,
+                Body = body
+            };
+            await smtp.SendMailAsync(message);
+        }
+
 
         private string GenerateJwtToken(User user)
         {

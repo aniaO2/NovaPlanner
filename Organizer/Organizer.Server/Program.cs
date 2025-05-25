@@ -13,6 +13,17 @@ builder.Services.Configure<MongoDBSettings>(builder.Configuration.GetSection("Mo
 // Configure JWT settings
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
 
+// Configure Email settings
+
+builder.Configuration
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddUserSecrets<Program>()
+    .AddEnvironmentVariables();
+
+builder.Services.Configure<EmailSettings>(
+    builder.Configuration.GetSection("EmailSettings"));
+
+
 // Register IHttpContextAccessor
 builder.Services.AddHttpContextAccessor();
 
@@ -20,10 +31,12 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<UserService>(sp =>
 {
     var dbSettings = sp.GetRequiredService<IOptions<MongoDBSettings>>();
+    var emailSettings = sp.GetRequiredService<IOptions<EmailSettings>>();
     var jwtSecret = builder.Configuration.GetValue<string>("JwtSettings:Secret")
                     ?? throw new InvalidOperationException("JWT Secret is not configured.");
-    return new UserService(dbSettings, jwtSecret);
+    return new UserService(dbSettings, emailSettings, jwtSecret);
 });
+
 
 // Register other services
 builder.Services.AddSingleton<TaskService>();

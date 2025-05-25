@@ -58,6 +58,10 @@ const Dashboard = () => {
         navigate('/', {replace: true});
     };
 
+    const goToSettings = () => {
+        navigate('/settings');
+    };
+
     const togglePopup = () => setShowPopup(prev => !prev);
     const toggleMenu = () => setMenuOpen(prev => !prev);
 
@@ -201,7 +205,7 @@ const Dashboard = () => {
                     <button className="hamburger-icon" onClick={toggleMenu}>☰</button>
                     {menuOpen && (
                         <div className="hamburger-menu">
-                            <Button variant="outline-secondary" size="sm" className="menu-btn">⚙️ Settings</Button>
+                            <Button variant="outline-secondary" size="sm" className="menu-btn" onClick={goToSettings}>⚙️ Settings</Button>
                             <Button variant="outline-danger" size="sm" className="menu-btn" onClick={handleLogout}>
                                 🔓 Logout
                             </Button>

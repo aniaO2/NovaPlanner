@@ -48,6 +48,11 @@ const Login = () => {
                             onChange={(e) => setPassword(e.target.value)}
                             required
                         />
+                        </div>
+                    <div className="forgot-password">
+                        <span onClick={() => navigate('/forgot-password')} style={{ cursor: 'pointer', color: '#007bff' }}>
+                                Forgot your password?
+                        </span>
                     </div>
                     <div className="button-group">
                         <button type="submit" className="btn-primary">Login</button>
