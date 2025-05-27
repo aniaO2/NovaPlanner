@@ -163,3 +163,13 @@ input[type="date"] {
     border-radius: 6px;
     border: 1px solid #ccc;
 }
+
+.goal-with-checkpoints {
+    margin-bottom: 2rem;
+}
+
+.checkpoint-list {
+    border-left: 2px solid #ccc;
+    padding-left: 1rem;
+}
+

@@ -29,6 +29,7 @@ const Dashboard = () => {
 
     const [isEditing, setIsEditing] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
+    const [parentGoalId, setParentGoalId] = useState(null);
     const [selectedDate, setSelectedDate] = useState(new Date()); 
 
     const fetchTasks = async () => {
@@ -65,8 +66,9 @@ const Dashboard = () => {
     const togglePopup = () => setShowPopup(prev => !prev);
     const toggleMenu = () => setMenuOpen(prev => !prev);
 
-    const openAddPopup = () => {
+    const openAddPopup = (goalId = null) => {
         setIsEditing(false);
+        setParentGoalId(goalId); // goalId is the ID or null
         setCurrentTask({
             title: '',
             isCompleted: false,
@@ -76,6 +78,8 @@ const Dashboard = () => {
         });
         togglePopup();
     };
+
+
 
     const openEditPopup = (task) => {
         setIsEditing(true);
@@ -107,18 +111,21 @@ const Dashboard = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
+        console.log('parentGoalId:', parentGoalId);
         const payload = {
             ...currentTask,
             type:
-                activeView === 'habits' ? 'habit' :
-                activeView === 'goals' ? 'goal' :
-                activeView === 'dailies' ? 'daily' :
-                'todo',
+                parentGoalId ? 'checkpoint' :
+                    activeView === 'habits' ? 'habit' :
+                        activeView === 'goals' ? 'goal' :
+                            activeView === 'dailies' ? 'daily' :
+                                'todo',
             dueDate: currentTask.dueDate ? new Date(currentTask.dueDate) : new Date(),
             streak: activeView === 'habits' ? Number(currentTask.streak) : null,
             progress: activeView === 'goals' ? Number(currentTask.progress) : null,
+            goalId: parentGoalId, // null for non-checkpoints
         };
+
 
         try {
             if (isEditing) {
@@ -135,6 +142,7 @@ const Dashboard = () => {
                 dueDate: '',
             });
             await fetchTasks();
+            setParentGoalId(null);
         } catch (error) {
             console.error('Failed to save task:', error);
         }
@@ -159,7 +167,9 @@ const Dashboard = () => {
         ),
         habit: tasks.filter(task => task.type === 'habit'),
         goal: tasks.filter(task => task.type === 'goal'),
+        checkpoint: tasks.filter(task => task.type === 'checkpoint'),
     };
+
 
 
     const renderTasksWithControls = (tasksArray) =>
@@ -177,6 +187,15 @@ const Dashboard = () => {
                     <Button variant="outline-danger" size="sm" onClick={() => handleDelete(task._id)}>
                         🗑️ Delete
                     </Button>
+                    {activeView === 'goals' && (
+                        <Button
+                            variant="outline-success"
+                            size="sm"
+                            onClick={() => openAddPopup(task._id)}
+                        >
+                            ➕ Checkpoint
+                        </Button>
+                    )}
                 </div>
             </div>
         ));
@@ -236,7 +255,7 @@ const Dashboard = () => {
                                 style={{ width: 'auto' }}
                             />
                         )}
-                        <Button variant="success" onClick={openAddPopup}>➕ New Task</Button>
+                        <Button variant="success" onClick={() => openAddPopup()}>➕ New Task</Button>
                     </div>
                 </div>
 
@@ -252,7 +271,58 @@ const Dashboard = () => {
                     {!loading && !error && activeView === 'todo' && renderTasksWithControls(filteredTasks.todo)}
                     {!loading && !error && activeView === 'dailies' && renderTasksWithControls(filteredTasks.dailies)}
                     {!loading && !error && activeView === 'habits' && renderTasksWithControls(filteredTasks.habit)}
-                    {!loading && !error && activeView === 'goals' && renderTasksWithControls(filteredTasks.goal)}
+                    {!loading && !error && activeView === 'goals' &&
+    filteredTasks.goal.map(goal => {
+        const checkpoints = filteredTasks.checkpoint.filter(cp => cp.goalId === goal._id);
+
+        return (
+            <div key={goal._id} className="goal-with-checkpoints">
+                <div className="task-card">
+                    <h5>{goal.title}</h5>
+                    <p>Progress: {goal.progress}%</p>
+                    <p>Due: {goal.dueDate ? new Date(goal.dueDate).toLocaleDateString() : 'N/A'}</p>
+                    <p>Status: {goal.isCompleted ? 'Completed' : 'Pending'}</p>
+                    <div className="actions">
+                        <Button variant="outline-primary" size="sm" onClick={() => openEditPopup(goal)}>
+                            ✏️ Edit
+                        </Button>
+                        <Button variant="outline-danger" size="sm" onClick={() => handleDelete(goal._id)}>
+                            🗑️ Delete
+                        </Button>
+                        <Button
+                            variant="outline-success"
+                            size="sm"
+                            onClick={() => openAddPopup(goal._id)}
+                        >
+                            ➕ Add Checkpoint
+                        </Button>
+                    </div>
+                </div>
+
+                {/* Render checkpoints */}
+                {checkpoints.length > 0 && (
+                    <div className="checkpoint-list ms-4 mt-2">
+                        {checkpoints.map(cp => (
+                            <div key={cp._id} className="checkpoint-card p-2 mb-2 border rounded bg-light">
+                                <h6 className="mb-1">{cp.title}</h6>
+                                <p className="mb-1">Due: {cp.dueDate ? new Date(cp.dueDate).toLocaleDateString() : 'N/A'}</p>
+                                <p className="mb-1">Status: {cp.isCompleted ? 'Completed' : 'Pending'}</p>
+                                <div className="actions">
+                                    <Button variant="outline-primary" size="sm" onClick={() => openEditPopup(cp)}>
+                                        ✏️ Edit
+                                    </Button>
+                                    <Button variant="outline-danger" size="sm" onClick={() => handleDelete(cp._id)}>
+                                        🗑️ Delete
+                                    </Button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        );
+    })}
+
             </div>
             </main>
 

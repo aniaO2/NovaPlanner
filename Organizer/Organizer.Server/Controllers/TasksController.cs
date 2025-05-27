@@ -33,7 +33,7 @@ namespace Organizer.Server.Controllers
         [HttpGet("type/{type}")]
         public async Task<ActionResult<List<TaskItem>>> GetByType(string type)
         {
-            var validTypes = new[] { "todo", "daily", "goal" };
+            var validTypes = new[] { "todo", "daily", "goal", "habit", "checkpoint" };
             if (!validTypes.Contains(type.ToLower()))
             {
                 return BadRequest("Invalid task type.");

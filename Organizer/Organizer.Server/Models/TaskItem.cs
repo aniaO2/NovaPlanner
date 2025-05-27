@@ -20,7 +20,7 @@ namespace Organizer.Server.Models
         public DateTime DueDate { get; set; }
 
         [BsonElement("type")]
-        public string Type { get; set; } = "todo"; // Possible values: "todo", "daily", "goal"
+        public string Type { get; set; } = "todo"; // Possible values: "todo", "daily", "goal", "habit", "checkpoint"
 
         // Optional: Add specific fields only relevant to certain types
         [BsonElement("streak")]
@@ -30,5 +30,9 @@ namespace Organizer.Server.Models
         [BsonElement("progress")]
         [BsonIgnoreIfNull]
         public int? Progress { get; set; }
+
+        [BsonElement("goalId")]
+        [BsonIgnoreIfNull]
+        public string? GoalId { get; set; }
     }
 }
