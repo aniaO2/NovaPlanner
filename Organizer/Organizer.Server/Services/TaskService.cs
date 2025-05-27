@@ -61,6 +61,7 @@ namespace Organizer.Server.Services
             }
         }
 
+
         // Delete a task
         public async Task DeleteAsync(string id)
         {

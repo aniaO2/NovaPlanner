@@ -16,7 +16,7 @@ namespace Organizer.Server.Models
         public string Title { get; set; } = string.Empty;
 
         [BsonElement("isCompleted")]
-        public bool IsCompleted { get; set; } = false;
+        public bool? IsCompleted { get; set; } = false;
         public DateTime DueDate { get; set; }
 
         [BsonElement("type")]
@@ -30,6 +30,14 @@ namespace Organizer.Server.Models
         [BsonElement("progress")]
         [BsonIgnoreIfNull]
         public int? Progress { get; set; }
+
+        [BsonElement("estimatedTime")]
+        [BsonIgnoreIfNull]
+        public int? EstimatedTime { get; set; }
+
+        [BsonElement("dueTime")]
+        [BsonIgnoreIfNull]
+        public TimeSpan? dueTime { get; set; }
 
         [BsonElement("goalId")]
         [BsonIgnoreIfNull]

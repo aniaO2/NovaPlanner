@@ -25,12 +25,14 @@ const Dashboard = () => {
         streak: 0,
         progress: 0,
         dueDate: '',
+        estimatedTime: '',
+        dueTime: '',   
     });
 
     const [isEditing, setIsEditing] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
     const [parentGoalId, setParentGoalId] = useState(null);
-    const [selectedDate, setSelectedDate] = useState(new Date()); 
+    const [selectedDate, setSelectedDate] = useState(new Date());
 
     const fetchTasks = async () => {
         setLoading(true);
@@ -56,7 +58,7 @@ const Dashboard = () => {
 
     const handleLogout = () => {
         localStorage.removeItem('token');
-        navigate('/', {replace: true});
+        navigate('/', { replace: true });
     };
 
     const goToSettings = () => {
@@ -75,6 +77,8 @@ const Dashboard = () => {
             streak: 0,
             progress: 0,
             dueDate: '',
+            estimatedTime: '',
+            dueTime: '',
         });
         togglePopup();
     };
@@ -90,7 +94,9 @@ const Dashboard = () => {
                     ? 'goals'
                     : task.type === 'daily'
                         ? 'dailies'
-                        : 'todo'
+                        : task.type === 'checkpoint'
+                            ? 'goals' // associate checkpoints with goals
+                            : 'todo'
         );
         setCurrentTask({
             ...task,
@@ -112,6 +118,18 @@ const Dashboard = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         console.log('parentGoalId:', parentGoalId);
+        // For dailies: validate estimated time total does not exceed 24 hours
+        if (activeView === 'dailies') {
+            const totalEstimatedTime = filteredTasks.dailies
+                .filter(t => isEditing ? t._id !== currentTask._id : true)
+                .reduce((sum, t) => sum + (t.estimatedTime || 0), 0)
+                + Number(currentTask.estimatedTime || 0);
+
+            if (totalEstimatedTime > 24) {
+                alert('Total estimated time for dailies exceeds 24 hours.');
+                return;
+            }
+        }
         const payload = {
             ...currentTask,
             type:
@@ -123,6 +141,8 @@ const Dashboard = () => {
             dueDate: currentTask.dueDate ? new Date(currentTask.dueDate) : new Date(),
             streak: activeView === 'habits' ? Number(currentTask.streak) : null,
             progress: activeView === 'goals' ? Number(currentTask.progress) : null,
+            estimatedTime: activeView === 'dailies' ? Number(currentTask.estimatedTime || 0) : null,
+            dueTime: activeView === 'dailies' && currentTask.dueTime ? currentTask.dueTime : null,
             goalId: parentGoalId, // null for non-checkpoints
         };
 
@@ -140,6 +160,8 @@ const Dashboard = () => {
                 streak: 0,
                 progress: 0,
                 dueDate: '',
+                estimatedTime: '',
+                dueTime: '',
             });
             await fetchTasks();
             setParentGoalId(null);
@@ -249,7 +271,7 @@ const Dashboard = () => {
                         {activeView === 'dailies' && (
                             <input
                                 type="date"
-                                value={selectedDate.toISOString().substring(0, 10)}
+                                value={selectedDate.toLocaleDateString('en-CA')}
                                 onChange={(e) => setSelectedDate(new Date(e.target.value))}
                                 className="form-control"
                                 style={{ width: 'auto' }}
@@ -272,58 +294,58 @@ const Dashboard = () => {
                     {!loading && !error && activeView === 'dailies' && renderTasksWithControls(filteredTasks.dailies)}
                     {!loading && !error && activeView === 'habits' && renderTasksWithControls(filteredTasks.habit)}
                     {!loading && !error && activeView === 'goals' &&
-    filteredTasks.goal.map(goal => {
-        const checkpoints = filteredTasks.checkpoint.filter(cp => cp.goalId === goal._id);
+                        filteredTasks.goal.map(goal => {
+                            const checkpoints = filteredTasks.checkpoint.filter(cp => cp.goalId === goal._id);
 
-        return (
-            <div key={goal._id} className="goal-with-checkpoints">
-                <div className="task-card">
-                    <h5>{goal.title}</h5>
-                    <p>Progress: {goal.progress}%</p>
-                    <p>Due: {goal.dueDate ? new Date(goal.dueDate).toLocaleDateString() : 'N/A'}</p>
-                    <p>Status: {goal.isCompleted ? 'Completed' : 'Pending'}</p>
-                    <div className="actions">
-                        <Button variant="outline-primary" size="sm" onClick={() => openEditPopup(goal)}>
-                            ✏️ Edit
-                        </Button>
-                        <Button variant="outline-danger" size="sm" onClick={() => handleDelete(goal._id)}>
-                            🗑️ Delete
-                        </Button>
-                        <Button
-                            variant="outline-success"
-                            size="sm"
-                            onClick={() => openAddPopup(goal._id)}
-                        >
-                            ➕ Add Checkpoint
-                        </Button>
-                    </div>
-                </div>
+                            return (
+                                <div key={goal._id} className="goal-with-checkpoints">
+                                    <div className="task-card">
+                                        <h5>{goal.title}</h5>
+                                        <p>Progress: {goal.progress}%</p>
+                                        <p>Due: {goal.dueDate ? new Date(goal.dueDate).toLocaleDateString() : 'N/A'}</p>
+                                        <p>Status: {goal.isCompleted ? 'Completed' : 'Pending'}</p>
+                                        <div className="actions">
+                                            <Button variant="outline-primary" size="sm" onClick={() => openEditPopup(goal)}>
+                                                ✏️ Edit
+                                            </Button>
+                                            <Button variant="outline-danger" size="sm" onClick={() => handleDelete(goal._id)}>
+                                                🗑️ Delete
+                                            </Button>
+                                            <Button
+                                                variant="outline-success"
+                                                size="sm"
+                                                onClick={() => openAddPopup(goal._id)}
+                                            >
+                                                ➕ Add Checkpoint
+                                            </Button>
+                                        </div>
+                                    </div>
 
-                {/* Render checkpoints */}
-                {checkpoints.length > 0 && (
-                    <div className="checkpoint-list ms-4 mt-2">
-                        {checkpoints.map(cp => (
-                            <div key={cp._id} className="checkpoint-card p-2 mb-2 border rounded bg-light">
-                                <h6 className="mb-1">{cp.title}</h6>
-                                <p className="mb-1">Due: {cp.dueDate ? new Date(cp.dueDate).toLocaleDateString() : 'N/A'}</p>
-                                <p className="mb-1">Status: {cp.isCompleted ? 'Completed' : 'Pending'}</p>
-                                <div className="actions">
-                                    <Button variant="outline-primary" size="sm" onClick={() => openEditPopup(cp)}>
-                                        ✏️ Edit
-                                    </Button>
-                                    <Button variant="outline-danger" size="sm" onClick={() => handleDelete(cp._id)}>
-                                        🗑️ Delete
-                                    </Button>
+                                    {/* Render checkpoints */}
+                                    {checkpoints.length > 0 && (
+                                        <div className="checkpoint-list ms-4 mt-2">
+                                            {checkpoints.map(cp => (
+                                                <div key={cp._id} className="checkpoint-card p-2 mb-2 border rounded bg-light">
+                                                    <h6 className="mb-1">{cp.title}</h6>
+                                                    <p className="mb-1">Due: {cp.dueDate ? new Date(cp.dueDate).toLocaleDateString() : 'N/A'}</p>
+                                                    <p className="mb-1">Status: {cp.isCompleted ? 'Completed' : 'Pending'}</p>
+                                                    <div className="actions">
+                                                        <Button variant="outline-primary" size="sm" onClick={() => openEditPopup(cp)}>
+                                                            ✏️ Edit
+                                                        </Button>
+                                                        <Button variant="outline-danger" size="sm" onClick={() => handleDelete(cp._id)}>
+                                                            🗑️ Delete
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </div>
-        );
-    })}
+                            );
+                        })}
 
-            </div>
+                </div>
             </main>
 
             {showPopup && (
@@ -379,6 +401,32 @@ const Dashboard = () => {
                                     />
                                 </Form.Group>
                             )}
+
+                            {activeView === 'dailies' && (
+                                <>
+                                    <Form.Group className="mb-3">
+                                        <Form.Label>Estimated Time (hours)</Form.Label>
+                                        <Form.Control
+                                            type="number"
+                                            name="estimatedTime"
+                                            value={currentTask.estimatedTime || ''}
+                                            min={0}
+                                            max={24}
+                                            onChange={handleChange}
+                                        />
+                                    </Form.Group>
+                                    <Form.Group className="mb-3">
+                                        <Form.Label>Due Time</Form.Label>
+                                        <Form.Control
+                                            type="time"
+                                            name="dueTime"
+                                            value={currentTask.dueTime || ''}
+                                            onChange={handleChange}
+                                        />
+                                    </Form.Group>
+                                </>
+                            )}
+
 
                             <Form.Group className="mb-3">
                                 <Form.Check
