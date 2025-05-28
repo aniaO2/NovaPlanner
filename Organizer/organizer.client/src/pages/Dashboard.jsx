@@ -26,7 +26,7 @@ const Dashboard = () => {
         progress: 0,
         dueDate: '',
         estimatedTime: '',
-        dueTime: '',   
+        dueTime: '',
     });
 
     const [isEditing, setIsEditing] = useState(false);
@@ -71,12 +71,13 @@ const Dashboard = () => {
     const openAddPopup = (goalId = null) => {
         setIsEditing(false);
         setParentGoalId(goalId); // goalId is the ID or null
+        const today = new Date().toLocaleDateString('en-CA');
         setCurrentTask({
             title: '',
             isCompleted: false,
             streak: 0,
             progress: 0,
-            dueDate: '',
+            dueDate: today,
             estimatedTime: '',
             dueTime: '',
         });
@@ -133,17 +134,19 @@ const Dashboard = () => {
         const payload = {
             ...currentTask,
             type:
-                parentGoalId ? 'checkpoint' :
-                    activeView === 'habits' ? 'habit' :
-                        activeView === 'goals' ? 'goal' :
-                            activeView === 'dailies' ? 'daily' :
-                                'todo',
+                isEditing ? currentTask.type :
+                    parentGoalId ? 'checkpoint' :
+                        activeView === 'habits' ? 'habit' :
+                            activeView === 'goals' ? 'goal' :
+                                activeView === 'dailies' ? 'daily' :
+                                    'todo',
+
             dueDate: currentTask.dueDate ? new Date(currentTask.dueDate) : new Date(),
             streak: activeView === 'habits' ? Number(currentTask.streak) : null,
             progress: activeView === 'goals' ? Number(currentTask.progress) : null,
             estimatedTime: activeView === 'dailies' ? Number(currentTask.estimatedTime || 0) : null,
             dueTime: activeView === 'dailies' && currentTask.dueTime ? currentTask.dueTime : null,
-            goalId: parentGoalId, // null for non-checkpoints
+            goalId: isEditing ? currentTask.goalId : parentGoalId, // null for non-checkpoints
         };
 
 
@@ -164,7 +167,9 @@ const Dashboard = () => {
                 dueTime: '',
             });
             await fetchTasks();
-            setParentGoalId(null);
+            if (!isEditing && parentGoalId) {
+                setParentGoalId(null); // Only reset if we just created a checkpoint
+            }
         } catch (error) {
             console.error('Failed to save task:', error);
         }
@@ -204,20 +209,11 @@ const Dashboard = () => {
                 <p>Status: {task.isCompleted ? 'Completed' : 'Pending'}</p>
                 <div className="actions">
                     <Button variant="outline-primary" size="sm" onClick={() => openEditPopup(task)}>
-                        ✏️ Edit
+                        <i className="bi bi-pencil-fill edit"></i>
                     </Button>
                     <Button variant="outline-danger" size="sm" onClick={() => handleDelete(task._id)}>
-                        🗑️ Delete
+                        <i className="bi bi-trash2-fill delete"></i>
                     </Button>
-                    {activeView === 'goals' && (
-                        <Button
-                            variant="outline-success"
-                            size="sm"
-                            onClick={() => openAddPopup(task._id)}
-                        >
-                            ➕ Checkpoint
-                        </Button>
-                    )}
                 </div>
             </div>
         ));
@@ -306,17 +302,17 @@ const Dashboard = () => {
                                         <p>Status: {goal.isCompleted ? 'Completed' : 'Pending'}</p>
                                         <div className="actions">
                                             <Button variant="outline-primary" size="sm" onClick={() => openEditPopup(goal)}>
-                                                ✏️ Edit
+                                                <i className="bi bi-pencil-fill edit"></i>
                                             </Button>
                                             <Button variant="outline-danger" size="sm" onClick={() => handleDelete(goal._id)}>
-                                                🗑️ Delete
+                                                <i className="bi bi-trash2-fill delete"></i>
                                             </Button>
                                             <Button
                                                 variant="outline-success"
                                                 size="sm"
                                                 onClick={() => openAddPopup(goal._id)}
                                             >
-                                                ➕ Add Checkpoint
+                                                <i className="bi bi-flag-fill checkpoint"></i>
                                             </Button>
                                         </div>
                                     </div>
@@ -325,16 +321,16 @@ const Dashboard = () => {
                                     {checkpoints.length > 0 && (
                                         <div className="checkpoint-list ms-4 mt-2">
                                             {checkpoints.map(cp => (
-                                                <div key={cp._id} className="checkpoint-card p-2 mb-2 border rounded bg-light">
+                                                <div key={cp._id} className="task-card p-2 mb-2 border rounded bg-light">
                                                     <h6 className="mb-1">{cp.title}</h6>
                                                     <p className="mb-1">Due: {cp.dueDate ? new Date(cp.dueDate).toLocaleDateString() : 'N/A'}</p>
                                                     <p className="mb-1">Status: {cp.isCompleted ? 'Completed' : 'Pending'}</p>
                                                     <div className="actions">
                                                         <Button variant="outline-primary" size="sm" onClick={() => openEditPopup(cp)}>
-                                                            ✏️ Edit
+                                                            <i className="bi bi-pencil-fill edit"></i>
                                                         </Button>
                                                         <Button variant="outline-danger" size="sm" onClick={() => handleDelete(cp._id)}>
-                                                            🗑️ Delete
+                                                            <i className="bi bi-trash2-fill delete"></i>
                                                         </Button>
                                                     </div>
                                                 </div>
@@ -354,6 +350,7 @@ const Dashboard = () => {
                         <button className="popup-close" onClick={togglePopup}>✖</button>
                         <h4 className="mb-3">{isEditing ? 'Edit Task' : 'Add New Task'}</h4>
                         <Form onSubmit={handleSubmit}>
+                            {/* Title - shown for all types */}
                             <Form.Group className="mb-3">
                                 <Form.Label>Title</Form.Label>
                                 <Form.Control
@@ -365,43 +362,20 @@ const Dashboard = () => {
                                 />
                             </Form.Group>
 
-                            <Form.Group className="mb-3">
-                                <Form.Label>Due Date</Form.Label>
-                                <Form.Control
-                                    type="date"
-                                    name="dueDate"
-                                    value={currentTask.dueDate}
-                                    onChange={handleChange}
-                                />
-                            </Form.Group>
-
-                            {activeView === 'habits' && (
+                            {/* Due Date - only for todo and dailies */}
+                            {(activeView === 'todo' || activeView === 'dailies') && (
                                 <Form.Group className="mb-3">
-                                    <Form.Label>Streak</Form.Label>
+                                    <Form.Label>Due Date</Form.Label>
                                     <Form.Control
-                                        type="number"
-                                        name="streak"
-                                        value={currentTask.streak}
-                                        min={0}
+                                        type="date"
+                                        name="dueDate"
+                                        value={currentTask.dueDate}
                                         onChange={handleChange}
                                     />
                                 </Form.Group>
                             )}
 
-                            {activeView === 'goals' && (
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Progress (%)</Form.Label>
-                                    <Form.Control
-                                        type="number"
-                                        name="progress"
-                                        value={currentTask.progress}
-                                        min={0}
-                                        max={100}
-                                        onChange={handleChange}
-                                    />
-                                </Form.Group>
-                            )}
-
+                            {/* Dailies extra fields */}
                             {activeView === 'dailies' && (
                                 <>
                                     <Form.Group className="mb-3">
@@ -427,7 +401,36 @@ const Dashboard = () => {
                                 </>
                             )}
 
+                            {/* Habits - streak only */}
+                            {activeView === 'habits' && (
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Streak</Form.Label>
+                                    <Form.Control
+                                        type="number"
+                                        name="streak"
+                                        value={currentTask.streak}
+                                        min={0}
+                                        onChange={handleChange}
+                                    />
+                                </Form.Group>
+                            )}
 
+                            {/* Goals - progress only */}
+                            {activeView === 'goals' && (
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Progress (%)</Form.Label>
+                                    <Form.Control
+                                        type="number"
+                                        name="progress"
+                                        value={currentTask.progress}
+                                        min={0}
+                                        max={100}
+                                        onChange={handleChange}
+                                    />
+                                </Form.Group>
+                            )}
+
+                            {/* All types get isCompleted checkbox */}
                             <Form.Group className="mb-3">
                                 <Form.Check
                                     type="checkbox"

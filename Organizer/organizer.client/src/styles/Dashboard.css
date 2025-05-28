@@ -3,17 +3,17 @@
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
+    width: 98.4%;
     height: 60px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 1.0rem;
-    background: linear-gradient(90deg, rgba(255, 255, 255, 0.4), rgba(200, 235, 255, 0.4));
+    padding: 0 0.75rem;
+    background: linear-gradient( rgba(200, 235, 255, 0.4), #f4f9aa);
     backdrop-filter: blur(10px);
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 0 0 12px 12px;
+    border-radius: 12px;
     z-index: 1000;
 }
 
@@ -40,8 +40,7 @@
 }
 
     .top-nav-links button {
-        background: rgba(255, 255, 255, 0.25);
-        border: none;
+        background: linear-gradient(145deg, #38abe4, #f4f9aa);
         font-size: 1rem;
         font-weight: 500;
         color: #004e92;
@@ -53,15 +52,14 @@
     }
 
         .top-nav-links button:hover {
-            background: rgba(255, 255, 255, 0.6);
+            background: radial-gradient( #84cdec, #c9eeff);
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
         .top-nav-links button.active {
-            background: #ffffff;
-            color: #0077cc;
+            background: radial-gradient( #84cdec, #c9eeff);
             font-weight: bold;
-            border: 2px solid #0077cc;
+            border: 2px solid #7da4e8;
         }
 
 /* Logout Button */
@@ -82,39 +80,51 @@
 
 /* Task Cards (Better contrast) */
 .task-columns {
-    display: flex;
-    flex-direction: column; /* or row if you want horizontal alignment */
-    align-items: flex-start; /* Aligns to the left */
-    padding: 2rem;
+    display: grid;
     gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
 }
 
 /* Make cards longer and thinner */
-.task-card {
-    width: 100%;
-    height: 15rem;
-    padding: 0.5rem;
-    background: linear-gradient(145deg, #f4f9aa, #e2f46b);
-    border-radius: 20px;
-    box-shadow: 0 8px 24px rgba(0, 100, 200, 0.15);
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    color: #3a4600;
+.task-card, .checkpoint-card {
+    background-color: #c9eeff;
+    background: linear-gradient(to bottom right, #f4f9aa, #c9eeff, #ccff7c);
+    border-radius: 16px;
+    padding: 1rem;
+    box-shadow: 0 4px 8px rgba(13, 110, 253, 0.1);
+    transition: transform 0.2s ease-in-out;
 }
 
-    /* Improve layout of buttons inside cards */
-    .task-card .actions {
-        gap: 1rem;
-        margin-top: 0.5rem;
+    .task-card:hover,
+    .checkpoint-card:hover {
+        transform: translateY(-3px);
     }
 
+    /* Improve layout of buttons inside cards */
+.task-card .actions {
+    display: flex;
+    gap: 12px; /* space between buttons */
+    justify-content: center; /* optional, center them horizontally */
+    align-items: center;
+}
+
     /* Adjust button size */
-    .task-card button {
-        min-width: 90px;
-        padding: 0.4rem 0.75rem;
-        font-weight: 600;
-    }
+.task-card button {
+    border: 2px solid #cbd5e1;
+    border-radius: 999px; /* Bubble shape */
+    font-size: 1em;
+    font-weight: 500;
+    font-family: inherit;
+    background: linear-gradient(145deg, #e0f7fa, #d9f0f6);
+    box-shadow: inset -1px -1px 3px rgba(255, 255, 255, 0.8), inset 1px 1px 3px rgba(0, 0, 0, 0.1), 1px 1px 6px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.4rem 0.75rem;
+    font-weight: 600;
+}
 
 /* Hamburger Menu */
 .hamburger-container {
@@ -172,4 +182,3 @@ input[type="date"] {
     border-left: 2px solid #ccc;
     padding-left: 1rem;
 }
-
