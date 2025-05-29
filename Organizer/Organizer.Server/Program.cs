@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.SemanticKernel;
 using Organizer.Server.Models;
 using Organizer.Server.Services;
 using System.Text;
@@ -22,6 +23,9 @@ builder.Configuration
 
 builder.Services.Configure<EmailSettings>(
     builder.Configuration.GetSection("EmailSettings"));
+
+// Configure Semantic Kernel
+builder.Services.AddSingleton<SemanticKernelService>();
 
 
 // Register IHttpContextAccessor

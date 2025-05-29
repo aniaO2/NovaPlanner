@@ -76,5 +76,17 @@ namespace Organizer.Server.Services
         {
             return _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
         }
+
+        // Read dailies
+        public async Task<List<TaskItem>> GetDailiesForUserAsync(string userId, int noOfDays)
+        {
+            var startDate = DateTime.UtcNow.Date.AddDays(-noOfDays);
+            return await _tasks.Find(t =>
+                t.UserId == userId &&
+                t.Type == "daily" &&
+                t.DueDate.Date >= startDate
+            ).ToListAsync();
+        }
+
     }
 }

@@ -32,6 +32,7 @@ const Dashboard = () => {
     const [menuOpen, setMenuOpen] = useState(false);
     const [parentGoalId, setParentGoalId] = useState(null);
     const [selectedDate, setSelectedDate] = useState(new Date());
+    const [feedback, setFeedback] = useState(null);
 
     const fetchTasks = async () => {
         setLoading(true);
@@ -184,6 +185,23 @@ const Dashboard = () => {
             console.error('Failed to delete task:', error);
         }
     };
+
+    const handleEvaluate = async () => {
+        try {
+            const userId = localStorage.getItem('userId');
+            const response = await axios.post('/assistant/evaluate-dailies', {
+                userId,
+                todayTasks: tasks.map(task => ({
+                    EstimatedTime: task.estimatedTime || 0,
+                    IsCompleted: !!task.isCompleted
+                }))
+            });
+            setFeedback(response.data);
+        } catch (error) {
+            console.error('Error evaluating dailies:', error);
+        }
+    };
+
 
     const filteredTasks = {
         todo: tasks.filter(task => task.type === 'todo'),
@@ -401,6 +419,43 @@ const Dashboard = () => {
                     </div>
                 </div>
             )}
+            {/* Butonul cu beculeț */}
+            <button
+                onClick={handleEvaluate}
+                title="Evaluează planul zilnic"
+                style={{
+                    position: 'fixed',
+                    bottom: '20px',
+                    right: '20px',
+                    backgroundColor: '#fff',
+                    borderRadius: '50%',
+                    padding: '10px',
+                    boxShadow: '0 0 10px rgba(0,0,0,0.2)',
+                    cursor: 'pointer',
+                    zIndex: 1000,
+                }}
+            >
+            </button>
+
+            {/* Feedback asistent */}
+            {feedback && (
+                <div
+                    style={{
+                        position: 'fixed',
+                        bottom: '80px',
+                        right: '20px',
+                        backgroundColor: '#f9fafb',
+                        padding: '12px 16px',
+                        borderRadius: '8px',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                        maxWidth: '300px',
+                        zIndex: 1000,
+                    }}
+                >
+                    <strong>Asistent:</strong><br /> {feedback}
+                </div>
+            )}
+
         </div>
     );
 };
