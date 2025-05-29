@@ -3,9 +3,8 @@ import { Button, Form, Spinner, Alert } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import axios from '../api/AxiosInstance';
 
-import ToDoPage from './ToDoPage';
-import HabitsPage from './HabitsPage';
-import GoalsPage from './GoalsPage';
+import GoalWithCheckpoints from '../components/GoalWithCheckpoints';
+import ToDoList from '../components/ToDoList';
 
 import '../styles/Dashboard.css';
 import '../styles/TaskPopup.css';
@@ -197,27 +196,6 @@ const Dashboard = () => {
         checkpoint: tasks.filter(task => task.type === 'checkpoint'),
     };
 
-
-
-    const renderTasksWithControls = (tasksArray) =>
-        tasksArray.map(task => (
-            <div key={task._id} className="task-card">
-                <h5>{task.title}</h5>
-                {activeView === 'habits' && <p>Streak: {task.streak}</p>}
-                {activeView === 'goals' && <p>Progress: {task.progress}%</p>}
-                <p>Due: {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'N/A'}</p>
-                <p>Status: {task.isCompleted ? 'Completed' : 'Pending'}</p>
-                <div className="actions">
-                    <Button variant="outline-primary" size="sm" onClick={() => openEditPopup(task)}>
-                        <i className="bi bi-pencil-fill edit"></i>
-                    </Button>
-                    <Button variant="outline-danger" size="sm" onClick={() => handleDelete(task._id)}>
-                        <i className="bi bi-trash2-fill delete"></i>
-                    </Button>
-                </div>
-            </div>
-        ));
-
     return (
         <div className="dashboard-container">
             <header className="topbar">
@@ -278,70 +256,45 @@ const Dashboard = () => {
                 </div>
 
 
-                <div className="task-columns">
+                <div>
                     {loading && (
-                        <div className="d-flex  my-4">
+                        <div className="d-flex my-4">
                             <Spinner animation="border" />
                         </div>
                     )}
                     {error && <Alert variant="danger">{error}</Alert>}
 
-                    {!loading && !error && activeView === 'todo' && renderTasksWithControls(filteredTasks.todo)}
-                    {!loading && !error && activeView === 'dailies' && renderTasksWithControls(filteredTasks.dailies)}
-                    {!loading && !error && activeView === 'habits' && renderTasksWithControls(filteredTasks.habit)}
-                    {!loading && !error && activeView === 'goals' &&
-                        filteredTasks.goal.map(goal => {
-                            const checkpoints = filteredTasks.checkpoint.filter(cp => cp.goalId === goal._id);
+                    {!loading && !error && activeView === 'todo' && (
+                        <ToDoList tasks={filteredTasks.todo} onEdit={openEditPopup} onDelete={handleDelete} />
+                    )}
 
-                            return (
-                                <div key={goal._id} className="goal-with-checkpoints">
-                                    <div className="task-card">
-                                        <h5>{goal.title}</h5>
-                                        <p>Progress: {goal.progress}%</p>
-                                        <p>Due: {goal.dueDate ? new Date(goal.dueDate).toLocaleDateString() : 'N/A'}</p>
-                                        <p>Status: {goal.isCompleted ? 'Completed' : 'Pending'}</p>
-                                        <div className="actions">
-                                            <Button variant="outline-primary" size="sm" onClick={() => openEditPopup(goal)}>
-                                                <i className="bi bi-pencil-fill edit"></i>
-                                            </Button>
-                                            <Button variant="outline-danger" size="sm" onClick={() => handleDelete(goal._id)}>
-                                                <i className="bi bi-trash2-fill delete"></i>
-                                            </Button>
-                                            <Button
-                                                variant="outline-success"
-                                                size="sm"
-                                                onClick={() => openAddPopup(goal._id)}
-                                            >
-                                                <i className="bi bi-flag-fill checkpoint"></i>
-                                            </Button>
-                                        </div>
-                                    </div>
+                    {!loading && !error && activeView === 'dailies' && (
+                        <ToDoList tasks={filteredTasks.dailies} onEdit={openEditPopup} onDelete={handleDelete} />
+                    )}
 
-                                    {/* Render checkpoints */}
-                                    {checkpoints.length > 0 && (
-                                        <div className="checkpoint-list ms-4 mt-2">
-                                            {checkpoints.map(cp => (
-                                                <div key={cp._id} className="task-card p-2 mb-2 border rounded bg-light">
-                                                    <h6 className="mb-1">{cp.title}</h6>
-                                                    <p className="mb-1">Due: {cp.dueDate ? new Date(cp.dueDate).toLocaleDateString() : 'N/A'}</p>
-                                                    <p className="mb-1">Status: {cp.isCompleted ? 'Completed' : 'Pending'}</p>
-                                                    <div className="actions">
-                                                        <Button variant="outline-primary" size="sm" onClick={() => openEditPopup(cp)}>
-                                                            <i className="bi bi-pencil-fill edit"></i>
-                                                        </Button>
-                                                        <Button variant="outline-danger" size="sm" onClick={() => handleDelete(cp._id)}>
-                                                            <i className="bi bi-trash2-fill delete"></i>
-                                                        </Button>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            );
-                        })}
+                    {!loading && !error && activeView === 'habits' && (
+                        <ToDoList tasks={filteredTasks.habit} onEdit={openEditPopup} onDelete={handleDelete} />
+                    )}
 
+                    {!loading && !error && activeView === 'goals' && (
+                        <div className="task-columns">
+                            {filteredTasks.goal.map(goal => {
+                                const checkpoints = filteredTasks.checkpoint.filter(cp => cp.goalId === goal._id);
+                                return (
+                                    <GoalWithCheckpoints
+                                        key={goal._id}
+                                        goal={goal}
+                                        checkpoints={checkpoints}
+                                        onEdit={openEditPopup}
+                                        onDelete={handleDelete}
+                                        onAddCheckpoint={openAddPopup}
+                                    />
+                                );
+                            })}
+                        </div>
+                    )}
                 </div>
+
             </main>
 
             {showPopup && (

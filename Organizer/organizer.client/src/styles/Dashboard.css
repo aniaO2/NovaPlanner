@@ -85,8 +85,10 @@
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
 }
 
-/* Make cards longer and thinner */
+
+
 .task-card, .checkpoint-card {
+    display: block;
     background-color: #c9eeff;
     background: linear-gradient(to bottom right, #f4f9aa, #c9eeff, #ccff7c);
     border-radius: 16px;
@@ -101,15 +103,15 @@
     }
 
     /* Improve layout of buttons inside cards */
-.task-card .actions {
+.task-card .actions, .checkpoint-card .actions {
     display: flex;
-    gap: 12px; /* space between buttons */
-    justify-content: center; /* optional, center them horizontally */
+    gap: 12px; 
+    justify-content: center; 
     align-items: center;
 }
 
     /* Adjust button size */
-.task-card button {
+.task-card button, .checkpoint-card button {
     border: 2px solid #cbd5e1;
     border-radius: 999px; /* Bubble shape */
     font-size: 1em;

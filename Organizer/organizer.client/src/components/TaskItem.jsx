@@ -1,47 +1,22 @@
 import React from 'react';
-import { ProgressBar } from 'react-bootstrap';
+import { Button } from 'react-bootstrap';
 
-const TaskItem = ({ task, type }) => {
+const TaskItem = ({ task, onEdit, onDelete }) => {
     return (
-        <div className="task-item d-flex flex-column mb-3">
-            {type === 'daily' && (
-                <div className="d-flex align-items-center">
-                    <input
-                        type="checkbox"
-                        checked={task.completed}
-                        readOnly
-                        className="me-2"
-                    />
-                    <span>
-                        <strong>{task.title}</strong> — Streak: {task.streak ?? 0}
-                    </span>
-                </div>
-            )}
-
-            {type === 'goal' && (
-                <>
-                    <strong>{task.title}</strong>
-                    <ProgressBar
-                        now={task.progress ?? 0}
-                        label={`${task.progress ?? 0}%`}
-                        className="mt-2"
-                    />
-                </>
-            )}
-
-            {type === 'todo' && (
-                <div className="d-flex align-items-center">
-                    <input
-                        type="checkbox"
-                        checked={task.isCompleted}
-                        readOnly
-                        className="me-2"
-                    />
-                    <span>
-                        <strong>{task.title}</strong> — {task.isCompleted ? 'Completed' : 'Pending'}
-                    </span>
-                </div>
-            )}
+        <div className="task-card">
+            <h5>{task.title}</h5>
+            {task.streak !== undefined && <p>Streak: {task.streak}</p>}
+            {task.progress !== undefined && <p>Progress: {task.progress}%</p>}
+            <p>Due: {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'N/A'}</p>
+            <p>Status: {task.isCompleted ? 'Completed' : 'Pending'}</p>
+            <div className="actions">
+                <Button variant="outline-primary" size="sm" onClick={() => onEdit(task)}>
+                    <i className="bi bi-pencil-fill edit"></i>
+                </Button>
+                <Button variant="outline-danger" size="sm" onClick={() => onDelete(task._id)}>
+                    <i className="bi bi-trash2-fill delete"></i>
+                </Button>
+            </div>
         </div>
     );
 };

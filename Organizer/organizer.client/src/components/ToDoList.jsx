@@ -1,12 +1,11 @@
 import React from 'react';
 import TaskItem from './TaskItem';
 
-const ToDoList = ({ name, tasks, type }) => {
+const ToDoList = ({ tasks, onEdit, onDelete }) => {
     return (
-        <div className="task-list mb-4">
-            <h4>{name}</h4>
+        <div className="task-columns">
             {tasks.map(task => (
-                <TaskItem key={task.id} task={task} type={type} />
+                <TaskItem key={task._id} task={task} onEdit={onEdit} onDelete={onDelete} />
             ))}
         </div>
     );
