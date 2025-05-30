@@ -11,6 +11,13 @@ using System.Net.Mail;
 
 namespace Organizer.Server.Services
 {
+    //dto to hold login response data
+    //we want to separate the login response so we can fetch both the token AND the userId
+    public class LoginResponse
+    {
+        public string Token { get; set; } = null!;
+        public string UserId { get; set; } = null!;
+    }
     public class UserService
     {
         private readonly IMongoCollection<User> _users;
@@ -44,7 +51,7 @@ namespace Organizer.Server.Services
             return true;
         }
 
-        public async Task<string?> LoginAsync(string identifier, string password)
+        public async Task<LoginResponse?> LoginAsync(string identifier, string password)
         {
             var user = await _users.Find(u => u.Username == identifier || u.Email == identifier).FirstOrDefaultAsync();
             if (user == null)
@@ -52,7 +59,11 @@ namespace Organizer.Server.Services
 
             if (VerifyPassword(password, user.Password))
             {
-                return GenerateJwtToken(user);
+                return new LoginResponse
+                {
+                    Token = GenerateJwtToken(user),
+                    UserId = user.Id
+                };
             }
 
             return null;

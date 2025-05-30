@@ -22,6 +22,10 @@ namespace Organizer.Server.Controllers
         [HttpPost("evaluate-dailies")]
         public async Task<IActionResult> EvaluateDailies([FromBody] EvaluateRequest request)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             var today = DateTime.UtcNow.Date;
 
             var recentTasks = await _taskService.GetDailiesForUserAsync(request.UserId, 30); // ultimele 30 de zile
@@ -38,17 +42,17 @@ namespace Organizer.Server.Controllers
             var plugin = new TaskAnalysisPlugin();
             var kpiText = plugin.FormatKpiSummary(grouped);
 
+            var todayTasksFormatted = string.Join("\n", request.TodayTasks.Select(t => $"- {t.Title} ({t.EstimatedTime}h)"));
             var todayTotal = request.TodayTasks.Sum(t => t.EstimatedTime);
 
-            var prompt = $@" Evaluează dacă planul de azi este realist: - Total ore estimate azi: {todayTotal}- Istoric:{kpiText}. Sugerează dacă utilizatorul ar trebui să reducă sarcinile.";
+            var prompt = $@" Evaluate if today's plan is realistic: - Today's tasks (total estimated hours: {todayTotal}):
+{todayTasksFormatted}- Past 30 days summary:{kpiText}. Suggest if the user should reduce the number of tasks or reorganize. Respond briefly and clearly, no markdown symbols.";
 
-            var kernel = Kernel.CreateBuilder()
-                .AddAzureOpenAIChatCompletion("gpt-4", "deployment", "https://endpoint", "key")
-                .Build();
-
+            var kernel = _kernelService.Kernel;
             var response = await kernel.InvokePromptAsync(prompt);
+
             return Ok(response.ToString());
         }
     }
-
+    
 }

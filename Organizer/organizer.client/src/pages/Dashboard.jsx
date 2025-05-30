@@ -189,9 +189,15 @@ const Dashboard = () => {
     const handleEvaluate = async () => {
         try {
             const userId = localStorage.getItem('userId');
+            const todayDailies = tasks.filter(task =>
+                task.type === 'daily' &&
+                new Date(task.dueDate).toDateString() === selectedDate.toDateString()
+            );
+
             const response = await axios.post('/assistant/evaluate-dailies', {
                 userId,
-                todayTasks: tasks.map(task => ({
+                todayTasks: todayDailies.map(task => ({
+                    Title: task.title,
                     EstimatedTime: task.estimatedTime || 0,
                     IsCompleted: !!task.isCompleted
                 }))
@@ -201,6 +207,8 @@ const Dashboard = () => {
             console.error('Error evaluating dailies:', error);
         }
     };
+
+
 
 
     const filteredTasks = {
@@ -422,7 +430,7 @@ const Dashboard = () => {
             {/* Butonul cu beculeț */}
             <button
                 onClick={handleEvaluate}
-                title="Evaluează planul zilnic"
+                title="Evaluate today's plan"
                 style={{
                     position: 'fixed',
                     bottom: '20px',
@@ -434,7 +442,7 @@ const Dashboard = () => {
                     cursor: 'pointer',
                     zIndex: 1000,
                 }}
-            >
+            > <i class="bi bi-lightbulb-fill lightbulb"></i>
             </button>
 
             {/* Feedback asistent */}
@@ -452,7 +460,7 @@ const Dashboard = () => {
                         zIndex: 1000,
                     }}
                 >
-                    <strong>Asistent:</strong><br /> {feedback}
+                    <strong> Your Novassistant:</strong><br /> {feedback}
                 </div>
             )}
 

@@ -29,13 +29,13 @@ namespace Organizer.Server.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            var token = await _userService.LoginAsync(request.Identifier, request.Password);
-            if (token == null)
+            var result = await _userService.LoginAsync(request.Identifier, request.Password);
+            if (result == null)
             {
                 return Unauthorized("Invalid credentials.");
             }
 
-            return Ok(new { Token = token });
+            return Ok(result);
         }
 
         [HttpPost("change-password")]

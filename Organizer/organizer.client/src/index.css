@@ -65,6 +65,15 @@ button {
     text-shadow: 0px 1px 2px transparent;
 }
 
+.lightbulb{
+    color: #ffcc00;
+    background: linear-gradient(145deg, #ffcc00, transparent);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0px 1px 2px transparent;
+
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;

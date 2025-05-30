@@ -13,8 +13,9 @@ const Login = () => {
         e.preventDefault();
 
         try {
-            const { token } = await UserService.login({ identifier, password });
+            const { token, userId } = await UserService.login({ identifier, password });
             localStorage.setItem('token', token);
+            localStorage.setItem('userId', userId);
             navigate('/dashboard', { replace: true });
         } catch {
             setError('Invalid credentials. Please try again.');
