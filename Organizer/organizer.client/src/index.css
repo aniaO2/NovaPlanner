@@ -16,6 +16,25 @@ html, body, #root {
     -moz-osx-font-smoothing: grayscale;
 }
 
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(to bottom right, #a8e0ff, #b4f8c8, #8ee3f5, #70cad1);
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    overflow: hidden;
+}
+
+.wrapper {
+    position: relative;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    padding: 20px;
+    z-index: 1;
+}
 
 
 h1 {
@@ -74,15 +93,203 @@ button {
 
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+
+.form-group {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    z-index: 2;
+    position: relative;
+}
+
+    .form-group label {
+        margin-bottom: 0.25rem;
+        margin-left: 0.3rem;
+        z-index: 2;
+        background: linear-gradient(to right, #00a8d1, #00ad6b);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 300;
+        font-size: 15px;
+        text-shadow: 0 0.5px 1px rgba(100, 180, 210, 0.4), 0 1px 2px rgba(0, 55, 70, 0.3);
+    }
+
+    .form-group input {
+        padding: 12px;
+        background: linear-gradient(to bottom right, #ffffff, #daf5ff);
+        border-radius: 24px;
+        border: 1px solid #84cdec;
+        font-size: 16px;
+        color: #222;
+        transition: all 0.3s ease-in-out;
+        box-shadow: inset 0 1px 4px rgba(0,0,0,0.08), 0 2px 6px rgba(0, 200, 255, 0.2);
+    }
+
+        .form-group input:focus {
+            border-color: #00aaff;
+            outline: none;
+            box-shadow: 0 0 12px rgba(0, 170, 255, 0.6);
+        }
+
+.bubbles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 0;
+    pointer-events: none;
+}
+
+    .bubbles span {
+        animation: rise 20s linear infinite, iridescent 8s ease-in-out infinite;
+        position: absolute;
+        display: block;
+        width: 40px;
+        height: 40px;
+        bottom: -150px;
+        border-radius: 50%;
+        /* Base bubble color with subtle shading */
+        background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.95), /* bright white center */
+        rgba(135, 206, 250, 0.8) 60%, /* light sky blue */
+        rgba(70, 130, 180, 0.5) 90%, /* steel blue */
+        transparent 100%);
+        rgba(160, 210, 255, 0.6) 60%, rgba(120, 190, 255, 0.3) 90%, transparent 100%);
+        /* Inner highlight for gloss */
+        box-shadow: inset 10px 10px 15px rgba(255, 255, 255, 0.9), /* strong inner highlight */
+        0 0 30px rgba(135, 206, 250, 0.8);
+        /* Optional blur for softness */
+        filter: drop-shadow(0 4px 8px rgba(255, 255, 255, 0.6)); /* softer white glow */
+        animation: rise 20s linear infinite;
+    }
+
+        .bubbles span::before {
+            content: "";
+            position: absolute;
+            top: 10%;
+            left: 25%;
+            width: 10px;
+            height: 10px;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.9;
+            filter: blur(1.5px);
+            pointer-events: none;
+        }
+
+        .bubbles span::after {
+            content: "";
+            position: absolute;
+            top: 25%;
+            left: 55%;
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0));
+            border-radius: 50%;
+            filter: blur(8px);
+            pointer-events: none;
+        }
+
+        .bubbles span:nth-child(1) {
+            left: 10%;
+            width: 60px;
+            height: 60px;
+            animation-duration: 22s;
+        }
+
+        .bubbles span:nth-child(2) {
+            left: 20%;
+            width: 40px;
+            height: 40px;
+            animation-duration: 18s;
+            animation-delay: 2s;
+        }
+
+        .bubbles span:nth-child(3) {
+            left: 30%;
+            width: 80px;
+            height: 80px;
+            animation-duration: 25s;
+            animation-delay: 4s;
+        }
+
+        .bubbles span:nth-child(4) {
+            left: 40%;
+            animation-duration: 20s;
+            animation-delay: 1s;
+        }
+
+        .bubbles span:nth-child(5) {
+            left: 50%;
+            width: 50px;
+            height: 50px;
+            animation-duration: 17s;
+            animation-delay: 3s;
+        }
+
+        .bubbles span:nth-child(6) {
+            left: 60%;
+            animation-duration: 23s;
+            animation-delay: 2s;
+        }
+
+        .bubbles span:nth-child(7) {
+            left: 70%;
+            width: 30px;
+            height: 30px;
+            animation-duration: 26s;
+            animation-delay: 5s;
+        }
+
+        .bubbles span:nth-child(8) {
+            left: 80%;
+            animation-duration: 19s;
+            animation-delay: 0s;
+        }
+
+        .bubbles span:nth-child(9) {
+            left: 90%;
+            width: 70px;
+            height: 70px;
+            animation-duration: 21s;
+            animation-delay: 1s;
+        }
+
+        .bubbles span:nth-child(10) {
+            left: 95%;
+            width: 45px;
+            height: 45px;
+            animation-duration: 24s;
+            animation-delay: 2s;
+        }
+
+@keyframes rise {
+    0% {
+        transform: translateY(0) scale(1);
+        opacity: 0.6;
+    }
+
+    50% {
+        opacity: 0.3;
+    }
+
+    100% {
+        transform: translateY(-1200px) scale(1.1);
+        opacity: 0;
+    }
+}
+
+@keyframes iridescent {
+    0% {
+        filter: hue-rotate(0deg);
+    }
+
+    50% {
+        filter: hue-rotate(30deg);
+    }
+
+    100% {
+        filter: hue-rotate(0deg);
+    }
 }

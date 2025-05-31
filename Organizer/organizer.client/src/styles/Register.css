@@ -1,95 +1,104 @@
-body {
-    margin: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(to bottom right, #b7f0ff, #8fe3ff, #a0dff0);
-  
-}
-
-.wrapper {
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
 .register-container {
     width: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
-
 }
 
 .register-card {
-    background: rgba(255, 255, 255, 0.85);
-    border-radius: 16px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 0.35);
+    border-radius: 32px;
+    box-shadow: 0 12px 40px rgba(0, 200, 255, 0.3);
     padding: 40px;
     max-width: 420px;
     width: 100%;
-    backdrop-filter: blur(12px);
+    backdrop-filter: blur(18px) saturate(160%);
     border: 1px solid rgba(255, 255, 255, 0.4);
+    position: relative;
+    overflow: hidden;
 }
+
+    /* Gloss shine */
+    .register-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        background: linear-gradient(145deg, rgba(255,255,255,0.25), rgba(255,255,255,0.05));
+        border-radius: 32px;
+        pointer-events: none;
+        z-index: 1;
+    }
 
 .register-title {
     font-size: 28px;
-    color: #007acc;
     text-align: center;
     margin-bottom: 10px;
+    position: relative;
+    z-index: 2;
+    background: linear-gradient(to right, #00b0e6, #00b974);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 700;
+    text-shadow: 0 1px 3px rgba(110, 190, 210, 0.45);
 }
 
 .register-subtitle {
     text-align: center;
-    color: #444;
     margin-bottom: 25px;
+    position: relative;
+    z-index: 2;
+    background: linear-gradient(to right, #00a8d1, #00ad6b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 200;
+    font-size: 18px;
+    text-shadow: 0 0.5px 1px rgba(100, 180, 210, 0.4), 0 1px 2px rgba(0, 55, 70, 0.3);
 }
-
-.form-group {
-    margin-bottom: 20px;
-    display: flex;
-    flex-direction: column;
-}
-
-    .form-group label {
-        margin-bottom: 8px;
-        color: #333;
-        font-weight: 600;
-    }
-
-    .form-group input {
-        padding: 10px;
-        background-color: #c9eeff;
-        border-radius: 8px;
-        border: 1px solid #84cdec;
-        font-size: 16px;
-        transition: border-color 0.3s;
-    }
-
-        .form-group input:focus {
-            border-color: #007acc;
-            outline: none;
-        }
 
 .btn-primary {
     width: 100%;
-    background: linear-gradient(to right, #00c6ff, #0072ff);
-    color: white;
     padding: 12px;
     font-size: 16px;
+    font-weight: bold;
+    color: white;
+    background: linear-gradient(to right, #00c6ff, #00cc88);
     border: none;
-    border-radius: 8px;
+    border-radius: 999px;
     cursor: pointer;
     transition: background 0.3s, transform 0.2s;
+    position: relative;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 4px 12px rgba(0, 123, 255, 0.25);
 }
 
+    /* Glossy shine */
+    .btn-primary::after {
+        content: '';
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        right: 2px;
+        height: 40%;
+        background: linear-gradient(to bottom, rgba(255,255,255,0.6), rgba(255,255,255,0));
+        border-radius: inherit;
+        pointer-events: none;
+        z-index: 1;
+    }
+
     .btn-primary:hover {
+        background: linear-gradient(to right, #33d6ff, #33e6a4);
         transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0, 200, 150, 0.3);
     }
 
 .register-footer {
     text-align: center;
     margin-top: 20px;
     color: #007acc;
+    z-index: 2;
+    position: relative;
 }
 
     .register-footer a {
@@ -98,7 +107,15 @@ body {
     }
 
 .error-message {
-    color: red;
-    margin-bottom: 15px;
+    color: #d32f2f;
+    background: linear-gradient(to bottom, rgba(255, 230, 230, 0.9), rgba(255, 200, 200, 0.6));
+    border: 1px solid #f99;
+    border-radius: 16px;
+    padding: 10px;
     text-align: center;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 6px rgba(255, 100, 100, 0.2);
+    z-index: 2;
+    position: relative;
 }
+

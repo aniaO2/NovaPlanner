@@ -22,48 +22,53 @@ const Register = () => {
 
     return (
         <div className="wrapper">
-        <div className="register-container">
-            <div className="register-card">
-                <h2 className="register-title">Create Account</h2>
-                <p className="register-subtitle">Join our community</p>
-                {error && <div className="error-message">{error}</div>}
-                <form onSubmit={handleRegister}>
-                    <div className="form-group">
-                        <label>Username</label>
-                        <input
-                            type="text"
-                            placeholder="Enter your name"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            required
-                        />
-                    </div>
-                    <div className="form-group">
-                        <label>Email</label>
-                        <input
-                            type="email"
-                            placeholder="Enter your email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                        />
-                    </div>
-                    <div className="form-group">
-                        <label>Password</label>
-                        <input
-                            type="password"
-                            placeholder="Enter your password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                        />
-                    </div>
-                    <button type="submit" className="btn-primary">Register</button>
-                </form>
-                <p className="register-footer">
-                    Already have an account? <a href="/">Login</a>
-                </p>
+            <div className="register-container">
+                <div className="register-card">
+                    <h2 className="register-title">Create Account</h2>
+                    <p className="register-subtitle">Start organizing the future you were promised</p>
+                    {error && <div className="error-message">{error}</div>}
+                    <form onSubmit={handleRegister}>
+                        <div className="form-group">
+                            <label>Username</label>
+                            <input
+                                type="text"
+                                placeholder="Enter your name"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                                required
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label>Email</label>
+                            <input
+                                type="email"
+                                placeholder="Enter your email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label>Password</label>
+                            <input
+                                type="password"
+                                placeholder="Enter your password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                            />
+                        </div>
+                        <button type="submit" className="btn-primary">Register</button>
+                    </form>
+                    <p className="register-footer">
+                        Already have an account? <a href="/">Login</a>
+                    </p>
+                </div>
             </div>
+
+            {/* Bubble background added outside register content */}
+            <div className="bubbles">
+                {[...Array(10)].map((_, i) => <span key={i}></span>)}
             </div>
         </div>
     );

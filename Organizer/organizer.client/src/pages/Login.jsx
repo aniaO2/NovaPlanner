@@ -50,17 +50,20 @@ const Login = () => {
                             required
                         />
                         </div>
-                    <div className="forgot-password">
+                        <div className="forgot-password" style={{marginBottom: '1rem'} }>
                         <span onClick={() => navigate('/forgot-password')} style={{ cursor: 'pointer', color: '#007bff' }}>
                                 Forgot your password?
                         </span>
                     </div>
                     <div className="button-group">
-                        <button type="submit" className="btn-primary">Login</button>
-                        <button onClick={goToRegister} className="btn-secondary">Register</button>
+                            <button type="submit" className="btn-primary">Sign In</button>
+                            <button type="button" onClick={goToRegister} className="btn-secondary">Create Account</button>
                     </div>
                 </form>
             </div>
+            </div>
+            <div className="bubbles">
+                {[...Array(10)].map((_, i) => <span key={i}></span>)}
             </div>
         </div>
     );
