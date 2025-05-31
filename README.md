@@ -1,1 +1,1 @@
-# ma chinui dont check this out 
+# Licenta?!
