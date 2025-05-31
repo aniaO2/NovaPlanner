@@ -68,9 +68,24 @@ namespace Organizer.Server.Controllers
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
         {
-            var result = await _userService.ForgotPasswordAsync(request.Email);
-            return result ? Ok("A new password has been sent to your email.") : NotFound("User with this email not found.");
+            var result = await _userService.RequestPasswordResetAsync(request.Email);
+            return result ? Ok("Reset link sent.") : NotFound("Email not found.");
         }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+        {
+            var result = await _userService.ResetPasswordAsync(request.Token, request.NewPassword);
+            return result ? Ok("Password has been reset.") : BadRequest("Invalid or expired token.");
+        }
+
+        public class ResetPasswordRequest
+        {
+            public string Token { get; set; } = string.Empty;
+            public string NewPassword { get; set; } = string.Empty;
+        }
+
+
 
         public class ForgotPasswordRequest
         {

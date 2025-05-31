@@ -9,7 +9,7 @@ const ForgotPassword = () => {
         e.preventDefault();
         try {
             await UserService.requestPasswordReset(email);
-            setMessage('If this email exists, a reset link was sent.');
+            setMessage('If this email exists, a password reset link was sent.');
         } catch {
             setMessage('Error sending reset instructions. Please try again later.');
         }

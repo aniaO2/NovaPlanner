@@ -17,5 +17,13 @@ namespace Organizer.Server.Models
 
         [BsonElement("password")]
         public string Password { get; set; } = string.Empty;  // Hashed password
+
+        // New fields for password reset
+        [BsonElement("passwordResetToken")]
+        public string? PasswordResetToken { get; set; }
+
+        [BsonElement("resetTokenExpiry")]
+        public DateTime? ResetTokenExpiry { get; set; }
+
     }
 }

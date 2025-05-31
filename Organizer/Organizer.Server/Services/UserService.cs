@@ -110,39 +110,31 @@ namespace Organizer.Server.Services
         }
 
 
-        public async Task<bool> ForgotPasswordAsync(string email)
+        public async Task<bool> RequestPasswordResetAsync(string email)
         {
             var user = await GetByEmailAsync(email);
             if (user == null)
                 return false;
 
-            // Generate a random new password
-            var newPassword = GenerateRandomPassword();
-            var hashedPassword = HashPassword(newPassword);
+            var token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+            var expiry = DateTime.UtcNow.AddHours(1);
 
-            // Update user password in database
-            var update = Builders<User>.Update.Set(u => u.Password, hashedPassword);
+            var update = Builders<User>.Update
+                .Set(u => u.PasswordResetToken, token)
+                .Set(u => u.ResetTokenExpiry, expiry);
+
             await _users.UpdateOneAsync(u => u.Id == user.Id, update);
-
-            // Send the new password via email
-            await SendResetPasswordEmail(user.Email, newPassword);
+            await SendResetLinkEmail(user.Email, token);
             return true;
         }
 
-        private string GenerateRandomPassword(int length = 10)
-        {
-            const string chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
-            var random = new Random();
-            return new string(Enumerable.Repeat(chars, length)
-                .Select(s => s[random.Next(s.Length)]).ToArray());
-        }
-
-        private async Task SendResetPasswordEmail(string email, string newPassword)
+        private async Task SendResetLinkEmail(string email, string token)
         {
             var fromAddress = new MailAddress(_emailSettings.FromEmail, _emailSettings.FromName);
             var toAddress = new MailAddress(email);
-            string subject = "NovaPlanner - Password Reset";
-            string body = $"Your new password is: {newPassword}\nPlease log in and change it in your settings.";
+            string subject = "NovaPlanner - Password Reset Link";
+            string resetUrl = $"https://localhost:5173/reset-password?token={WebUtility.UrlEncode(token)}";
+            string body = $"Click the link to reset your password:\n{resetUrl}\nThis link will expire in 1 hour.";
 
             var smtp = new SmtpClient
             {
@@ -160,6 +152,24 @@ namespace Organizer.Server.Services
                 Body = body
             };
             await smtp.SendMailAsync(message);
+        }
+
+        public async Task<bool> ResetPasswordAsync(string token, string newPassword)
+        {
+            var user = await _users.Find(u => u.PasswordResetToken == token && u.ResetTokenExpiry > DateTime.UtcNow)
+                                   .FirstOrDefaultAsync();
+            if (user == null)
+                return false;
+
+            var hashed = HashPassword(newPassword);
+
+            var update = Builders<User>.Update
+                .Set(u => u.Password, hashed)
+                .Unset(u => u.PasswordResetToken)
+                .Unset(u => u.ResetTokenExpiry);
+
+            var result = await _users.UpdateOneAsync(u => u.Id == user.Id, update);
+            return result.ModifiedCount == 1;
         }
 
 
