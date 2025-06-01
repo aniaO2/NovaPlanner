@@ -17,9 +17,9 @@ const ForgotPassword = () => {
 
     return (
         <div className="wrapper">
-            <div className="login-container">
-                <div className="login-card">
-                    <h2 className="login-title">Reset Password</h2>
+            <div className="reset-container">
+                <div className="reset-card">
+                    <h2 className="reset-title">Reset Password</h2>
                     {message && <div className="info-message">{message}</div>}
                     <form onSubmit={handleSubmit}>
                         <div className="form-group">
@@ -34,6 +34,9 @@ const ForgotPassword = () => {
                         <button type="submit" className="btn-primary">Send Reset Link</button>
                     </form>
                 </div>
+            </div>
+            <div className="bubbles">
+                {[...Array(10)].map((_, i) => <span key={i}></span>)}
             </div>
         </div>
     );

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import axios from '../api/axiosInstance';
+import '../styles/ResetPassword.css';
 
 const Settings = () => {
     const [currentPassword, setCurrentPassword] = useState('');
@@ -35,7 +36,9 @@ const Settings = () => {
     };
 
     return (
-        <div className="settings-container">
+        <div className="wrapper">
+            <div className="reset-container">
+                <div className="reset-card">
             <h2>Change Password</h2>
             {message && <div className="success-message">{message}</div>}
             {error && <div className="error-message">{error}</div>}
@@ -69,7 +72,12 @@ const Settings = () => {
                 </div>
                 <button type="submit" className="btn-primary">Change Password</button>
             </form>
-        </div>
+                </div>
+            </div>
+            <div className="bubbles">
+                {[...Array(10)].map((_, i) => <span key={i}></span>)}
+            </div>
+           </div>
     );
 };
 

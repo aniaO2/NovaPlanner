@@ -1,35 +1,138 @@
-/* Topbar */
+.dashboard-container {
+    position: relative;
+    min-height: 100vh;
+    background: linear-gradient(to bottom right, #a8e0ff, #b4f8c8, #8ee3f5, #70cad1);
+    overflow: hidden;
+}
+
+    /* Transparent image overlay */
+    .dashboard-container::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image: url('../../public/background.png'); /* Replace with your image path */
+        background-size: cover;
+        background-position: center;
+        opacity: 0.1; /* Control transparency */
+        pointer-events: none;
+        z-index: 0;
+    }
+
+
 .topbar {
-    position: fixed;
     top: 0;
     left: 0;
-    width: 98.4%;
+    right: 0;
+    margin: 0 0.5rem; /* match horizontal padding */
     height: 60px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 0.75rem;
-    background: linear-gradient( rgba(200, 235, 255, 0.4), #f4f9aa);
+    padding: 0 1rem;
+    background: linear-gradient(to bottom, #b3f2ff, #c8ffec, #f4ffe6); /* more harmonious Frutiger Aero style */
     backdrop-filter: blur(10px);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 16px;
+    box-shadow: inset 0 -1px 3px rgba(255, 255, 255, 0.6), /* bottom gloss */
+    0 2px 6px rgba(0, 0, 0, 0.1);
     border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 12px;
     z-index: 1000;
+    overflow: visible; /* Needed to contain the pseudo-element gloss */
+    position: relative;
 }
 
-.main-content {
-    padding-top: 2.5rem; /* match or exceed the topbar height */
+input:focus {
+    border: 1px solid rgba(0, 180, 200, 0.6);
+    outline: none;
+    box-shadow: 0 4px 10px rgba(0, 150, 180, 0.3);
 }
 
 
+    .topbar::after {
+        content: '';
+        position: absolute;
+        bottom: 2px;
+        left: 4px;
+        right: 4px;
+        height: 40%;
+        background: linear-gradient(to top, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0));
+        border-radius: 0 0 12px 12px;
+        pointer-events: none;
+        z-index: 1;
+    }
 
-/* Logo */
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
 .logo {
     font-size: 1.5rem;
-    font-weight: 600;
-    color: #004e92;
-    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    background: linear-gradient( to bottom, #e8ffff 0%, /* Soft light gloss at the top */
+    #aaf3ff 20%, /* Bright cyan/aqua */
+    #00b7cc 50%, /* Medium cyan */
+    #007fa3 80%, /* Deep blue-cyan */
+    #005f6b 100% /* Teal-blue base */
+    );
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 1px 1px rgba(0, 80, 100, 0.3), 0 2px 4px rgba(0, 60, 90, 0.2);
 }
+
+.logo-icon {
+    height: 32px;
+    width: auto;
+    display: block;
+    filter: drop-shadow(0 1px 1px rgba(255,255,255,0.6));
+}
+
+.new-task {
+    margin-left: 5rem;
+    margin-right: 65rem;
+    color: white;
+    background: linear-gradient(to right, #00c6ff, #00cc88);
+    font-size: 1rem;
+    font-weight: 500;
+    color: #004e92;
+    padding: 0.5rem 1.25rem;
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 4px 12px rgba(0, 123, 255, 0.25);
+}
+
+    .new-task:hover {
+        background: linear-gradient(to right, #66e4ff, #66f0bb);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0, 200, 150, 0.3);
+    }
+
+    .new-task::after {
+        content: '';
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        right: 2px;
+        height: 40%;
+        background: linear-gradient(to bottom, rgba(255,255,255,0.6), rgba(255,255,255,0));
+        border-radius: inherit;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .new-task:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 6px rgba(0, 200, 255, 0.3);
+    }
+
+
 
 /* Top Navigation Tabs */
 .top-nav-links {
@@ -40,67 +143,84 @@
 }
 
     .top-nav-links button {
-        background: linear-gradient(145deg, #38abe4, #f4f9aa);
+        background: linear-gradient(to right, #00c6ff, #00cc88);
         font-size: 1rem;
         font-weight: 500;
         color: #004e92;
         padding: 0.5rem 1.25rem;
-        border-radius: 20px;
+        border: none;
+        border-radius: 999px;
         cursor: pointer;
+        position: relative;
+        overflow: hidden;
         transition: all 0.3s ease;
-        box-shadow: inset 0 0 0 rgba(255,255,255,0.1);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 4px 12px rgba(0, 123, 255, 0.25);
     }
 
+        .top-nav-links button::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            right: 2px;
+            height: 40%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.6), rgba(255,255,255,0));
+            border-radius: inherit;
+            pointer-events: none;
+            z-index: 1;
+        }
+
         .top-nav-links button:hover {
-            background: radial-gradient( #84cdec, #c9eeff);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            background: linear-gradient(to right, #66e4ff, #66f0bb);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 200, 150, 0.3);
         }
 
         .top-nav-links button.active {
-            background: radial-gradient( #84cdec, #c9eeff);
+            background: linear-gradient(to right, #66e4ff, #66f0bb);
             font-weight: bold;
-            border: 2px solid #7da4e8;
         }
 
-/* Logout Button */
-.logout-btn {
-    font-size: 0.9rem;
-    padding: 0.4rem 0.75rem;
-    background-color: rgba(255, 99, 71, 0.9);
-    color: white;
-    border: none;
-    border-radius: 6px;
-    margin-right: 1.5rem;
-    transition: background-color 0.3s ease;
-}
-
-    .logout-btn:hover {
-        background-color: tomato;
-    }
-
-/* Task Cards (Better contrast) */
 .task-columns {
     display: grid;
     gap: 1.5rem;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    padding: 2rem 2rem;
+    margin: 0 auto;
+    max-width: 1400px;
 }
 
 
-
 .task-card, .checkpoint-card {
+    position: relative;
     display: block;
-    background-color: #c9eeff;
-    background: linear-gradient(to bottom right, #f4f9aa, #c9eeff, #ccff7c);
-    border-radius: 16px;
+    border-radius: 18px;
     padding: 1rem;
-    box-shadow: 0 4px 8px rgba(13, 110, 253, 0.1);
-    transition: transform 0.2s ease-in-out;
+    background: linear-gradient(to bottom right, #d9f9ff, #b8f0e5, #d7ffcc);
+    box-shadow: inset 1px 1px 4px rgba(255, 255, 255, 0.7), inset -1px -1px 4px rgba(0, 0, 0, 0.05), 0 4px 12px rgba(0, 140, 200, 0.2);
+    transition: transform 0.2s ease-in-out, box-shadow 0.3s ease;
 }
 
     .task-card:hover,
     .checkpoint-card:hover {
         transform: translateY(-3px);
+        box-shadow: inset 1px 1px 6px rgba(255, 255, 255, 0.8), 0 6px 18px rgba(0, 150, 200, 0.3);
     }
+
+    .task-card::after,
+    .checkpoint-card::after {
+        content: '';
+        position: absolute;
+        top: 4px;
+        left: 4px;
+        right: 4px;
+        height: 35%;
+        background: linear-gradient(to bottom, rgba(255,255,255,0.6), rgba(255,255,255,0));
+        border-radius: 14px;
+        pointer-events: none;
+        z-index: 1;
+    }
+
 
     /* Improve layout of buttons inside cards */
 .task-card .actions, .checkpoint-card .actions {
@@ -128,6 +248,54 @@
     font-weight: 600;
 }
 
+/* Checkbox */
+.task-checkbox-title {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+/* Frutiger Aero–inspired checkbox */
+.aero-checkbox {
+    position: relative;
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+}
+
+    .aero-checkbox input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .aero-checkbox .custom-check {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 24px;
+        height: 24px;
+        background: linear-gradient(to bottom right, #d0f4ff, #a8ecef);
+        border: 2px solid #8ed0e6;
+        border-radius: 6px;
+        box-shadow: inset -1px -1px 2px white, inset 1px 1px 2px #b0e3f0, 1px 1px 3px rgba(0,0,0,0.2);
+        transition: all 0.3s ease;
+    }
+
+    .aero-checkbox input:checked + .custom-check::after {
+        content: '';
+        position: absolute;
+        left: 6px;
+        top: 2px;
+        width: 8px;
+        height: 14px;
+        border: solid #3a3a3a;
+        border-width: 0 3px 3px 0;
+        transform: rotate(45deg);
+    }
+
+
 /* Hamburger Menu */
 .hamburger-container {
     position: relative;
@@ -146,35 +314,144 @@
 }
 
     .hamburger-icon:hover {
-        background-color: rgba(0, 78, 146, 0.1);
+        background: linear-gradient(to bottom right,#66e4ff, rgba(0, 78, 146, 0.1));
     }
 
 .hamburger-menu {
     position: absolute;
     top: 2.5rem;
     right: 0;
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    padding: 0.5rem;
+    background: linear-gradient(to bottom right, #e8ffff, #d2fff0, #fafffb);
+    border: 1px solid rgba(0, 100, 150, 0.1);
+    border-radius: 14px;
+    box-shadow: 0 8px 16px rgba(0, 100, 150, 0.1), inset 0 0 6px rgba(255, 255, 255, 0.6); /* inner gloss */
+    backdrop-filter: blur(12px);
+    padding: 0.75rem;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
     z-index: 1001;
+    min-width: 180px;
 }
 
 .menu-btn {
-    width: 100%;
-    text-align: left;
+    position: relative;
+    background: linear-gradient(to right, #00c6ff, #00cc88);
+    border: none;
+    font-size: 1rem;
+    padding: 0.4rem 0.75rem;
+    border-radius: 8px;
+    color: #004e92;
+    transition: background 0.3s ease, color 0.3s ease;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), 0 4px 12px rgba(0, 123, 255, 0.25);
 }
 
-/*for calendar*/
-input[type="date"] {
-    padding: 6px 10px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
+    .menu-btn:hover {
+        background: linear-gradient(to right, #66e4ff, #66f0bb);
+        color: #003e74;
+        box-shadow: 0 6px 16px rgba(0, 200, 150, 0.3);
+    }
+
+    .menu-btn::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    right: 2px;
+    height: 25%;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.6), rgba(255,255,255,0));
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 1;
 }
+
+
+/*for calendar*/
+.aero-input {
+    background: linear-gradient(to bottom right, rgba(173, 239, 255, 0.85), rgba(192, 255, 240, 0.9));
+    border-radius: 12px;
+    border: 1px solid rgba(0, 180, 200, 0.6);
+    padding: 8px 14px;
+    font-size: 15px;
+    box-shadow: inset 0 1px 1px rgba(255,255,255,0.9), 0 2px 4px rgba(0,120,160,0.3);
+    color: #00575d;
+    width:70%;
+}
+.aero-calendar {
+    background: linear-gradient(to bottom right, #c8ffff, #f0ffff);
+    border-radius: 12px;
+    border: 1px solid rgba(0, 200, 230, 0.5);
+    box-shadow: 0 4px 10px rgba(0, 150, 180, 0.3);
+    color: #004d55;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.react-datepicker-popper {
+    z-index: 2;
+}
+
+    .react-datepicker-popper[data-placement^=bottom] .react-datepicker__triangle {
+        fill: #b4faff;
+        stroke: rgba(0, 200, 230, 0.5);
+    }
+
+    .react-datepicker__header {
+        background: linear-gradient(to bottom right, #b4faff, #c8fffa);
+        border-bottom: 1px solid rgba(0, 200, 230, 0.5);
+        border-radius: 12px 12px 0 0;
+        padding: 10px;
+        color: #004d55;
+        font-weight: bold;
+        box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.8);
+    }
+
+.react-datepicker__current-month {
+    color: #006d75;
+}
+
+.react-datepicker__day-name {
+    color: #007c85;
+}
+
+.react-datepicker__navigation {
+    background: none;
+    cursor: pointer;
+    padding: 4px;
+    box-shadow: 0 2px 5px rgba(0, 120, 160, 0.3);
+    transition: background 0.3s;
+    margin-left: 0.25rem;
+    margin-right: 0.25rem;
+}
+
+    .react-datepicker__navigation:hover {
+        background: rgba(0, 150, 180, 0.3);
+    }
+
+.react-datepicker__navigation-icon::before {
+    border-color: #008fa0;
+    border-width: 3px 3px 0 0;
+    display: inline-block;
+    content: "";
+    position: absolute;
+    top: 10px;
+    width: 10px;
+}
+
+.calendar-icon {
+    position: absolute;
+    right: 3rem;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: auto;
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+    background-image: url('/calendar.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
 
 .goal-with-checkpoints {
     margin-bottom: 2rem;

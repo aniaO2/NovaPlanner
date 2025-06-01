@@ -1,14 +1,55 @@
 import React from 'react';
 import { Button } from 'react-bootstrap';
 
-const TaskItem = ({ task, onEdit, onDelete }) => {
+const TaskItem = ({ task, onEdit, onDelete, activeView }) => {
+    const handleStreakIncrement = () => {
+        const updatedTask = { ...task, streak: (task.streak || 0) + 1 };
+        onEdit(updatedTask);
+    };
     return (
         <div className="task-card">
-            <h5>{task.title}</h5>
-            {task.streak !== undefined && <p>Streak: {task.streak}</p>}
-            {task.progress !== undefined && <p>Progress: {task.progress}%</p>}
-            <p>Due: {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'N/A'}</p>
-            <p>Status: {task.isCompleted ? 'Completed' : 'Pending'}</p>
+            <div className="task-checkbox-title">
+                <label className="aero-checkbox">
+                    <input
+                        type="checkbox"
+                        checked={task.isCompleted}
+                        onChange={() => onEdit({ ...task, isCompleted: !task.isCompleted })}
+                    />
+                    <span className="custom-check"></span>
+                </label>
+                <h5>{task.title}</h5>
+            </div>
+            {activeView == "dailies" && (
+                <>
+                    <p><strong>Due:</strong> {new Date(task.dueDate).toLocaleDateString('en-CA') || 'N/A'}</p>
+                    <p><strong>Time:</strong> {task.dueTime || '—'}</p>
+                    <p><strong>Estimated hours:</strong> {task.estimatedTime ?? '—'}</p>
+                </>
+            )} 
+            {activeView == 'todo' && (
+                <p><strong>Due:</strong> {new Date(task.dueDate).toLocaleDateString('en-CA') || 'N/A'}</p>
+            )}
+            {activeView == 'habits' && (
+                <div className="d-flex align-items-center gap-2">
+                    <p>
+                        <strong>Streak:</strong> {task.streak}
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation(); // prevent parent click events if any
+                                handleStreakIncrement(task._id);
+                            }}
+                            style={{ marginLeft: '8px' }}
+                            title="Increase streak"
+                        >
+                            +
+                        </button>
+                    </p>
+
+                </div>
+            )}
+            {activeView == 'goals' && (
+                <p><strong>Progress:</strong> {task.progress ?? 0}%</p>
+            )}
             <div className="actions">
                 <Button variant="outline-primary" size="sm" onClick={() => onEdit(task)}>
                     <i className="bi bi-pencil-fill edit"></i>

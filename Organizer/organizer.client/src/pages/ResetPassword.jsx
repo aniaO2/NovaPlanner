@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import UserService from '../api/UserService';
+import '../styles/ResetPassword.css';
 
 const ResetPassword = () => {
     const [newPassword, setNewPassword] = useState('');
@@ -15,7 +16,7 @@ const ResetPassword = () => {
         try {
             await UserService.resetPassword({ token, newPassword });
             setMessage("Password reset successfully. You can now log in.");
-            setTimeout(() => navigate('/login'), 2000);
+            setTimeout(() => navigate('/'), 2000);
         } catch {
             setMessage("Reset failed. Token may be invalid or expired.");
         }
@@ -23,9 +24,9 @@ const ResetPassword = () => {
 
     return (
         <div className="wrapper">
-            <div className="login-container">
-                <div className="login-card">
-                    <h2 className="login-title">Reset Your Password</h2>
+            <div className="reset-container">
+                <div className="reset-card">
+                    <h2 className="reset-title">Reset Your Password</h2>
                     {message && <div className="info-message">{message}</div>}
                     <form onSubmit={handleSubmit}>
                         <div className="form-group">
@@ -41,7 +42,11 @@ const ResetPassword = () => {
                     </form>
                 </div>
             </div>
+            <div className="bubbles">
+                {[...Array(10)].map((_, i) => <span key={i}></span>)}
+            </div>
         </div>
+
     );
 };
 

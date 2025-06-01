@@ -1,5 +1,7 @@
-﻿import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useRef, useEffect } from 'react';
 import { Button, Form, Spinner, Alert } from 'react-bootstrap';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import { useNavigate } from 'react-router-dom';
 import axios from '../api/AxiosInstance';
 
@@ -30,6 +32,7 @@ const Dashboard = () => {
 
     const [isEditing, setIsEditing] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
+    const menuRef = useRef(null);
     const [parentGoalId, setParentGoalId] = useState(null);
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [feedback, setFeedback] = useState(null);
@@ -55,6 +58,17 @@ const Dashboard = () => {
     useEffect(() => {
         fetchTasks();
     }, []);
+
+    const filteredTasks = {
+        todo: tasks.filter(task => task.type === 'todo'),
+        dailies: tasks.filter(task =>
+            task.type === 'daily' &&
+            new Date(task.dueDate).toDateString() === selectedDate.toDateString()
+        ),
+        habit: tasks.filter(task => task.type === 'habit'),
+        goal: tasks.filter(task => task.type === 'goal'),
+        checkpoint: tasks.filter(task => task.type === 'checkpoint'),
+    };
 
     const handleLogout = () => {
         localStorage.removeItem('token');
@@ -84,24 +98,39 @@ const Dashboard = () => {
         togglePopup();
     };
 
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (menuRef.current && !menuRef.current.contains(event.target)) {
+                setMenuOpen(false);
+            }
+        };
+        // Add listener only if menu is open
+        if (menuOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [menuOpen]);
 
 
     const openEditPopup = (task) => {
         setIsEditing(true);
-        setActiveView(
-            task.type === 'habit'
-                ? 'habits'
-                : task.type === 'goal'
-                    ? 'goals'
-                    : task.type === 'daily'
-                        ? 'dailies'
-                        : task.type === 'checkpoint'
-                            ? 'goals' // associate checkpoints with goals
-                            : 'todo'
-        );
+        const newView = task.type === 'habit'
+            ? 'habits'
+            : task.type === 'goal'
+                ? 'goals'
+                : task.type === 'daily'
+                    ? 'dailies'
+                    : task.type === 'checkpoint'
+                        ? 'goals'
+                        : 'todo';
+
+        if (activeView !== newView) setActiveView(newView);
+        console.log(activeView);
         setCurrentTask({
             ...task,
-            dueDate: task.dueDate ? new Date(task.dueDate).toISOString().substring(0, 10) : '',
+            dueDate: task.dueDate ? new Date(task.dueDate).toLocaleDateString('en-CA') : '',
             streak: task.streak ?? 0,
             progress: task.progress ?? 0,
         });
@@ -122,8 +151,8 @@ const Dashboard = () => {
         // For dailies: validate estimated time total does not exceed 24 hours
         if (activeView === 'dailies') {
             const totalEstimatedTime = filteredTasks.dailies
-                .filter(t => isEditing ? t._id !== currentTask._id : true)
-                .reduce((sum, t) => sum + (t.estimatedTime || 0), 0)
+                .filter(t => (isEditing ? t._id !== currentTask._id : true))
+                .reduce((sum, t) => sum + (Number(t.estimatedTime) || 0), 0)
                 + Number(currentTask.estimatedTime || 0);
 
             if (totalEstimatedTime > 24) {
@@ -208,47 +237,36 @@ const Dashboard = () => {
         }
     };
 
-
-
-
-    const filteredTasks = {
-        todo: tasks.filter(task => task.type === 'todo'),
-        dailies: tasks.filter(task =>
-            task.type === 'daily' &&
-            new Date(task.dueDate).toDateString() === selectedDate.toDateString()
-        ),
-        habit: tasks.filter(task => task.type === 'habit'),
-        goal: tasks.filter(task => task.type === 'goal'),
-        checkpoint: tasks.filter(task => task.type === 'checkpoint'),
-    };
-
     return (
         <div className="dashboard-container">
             <header className="topbar">
-                <h3 className="logo">NovaPlanner</h3>
+                <div className="logo-container">
+                    <h3 className="logo">NovaPlanner</h3>
+                    <img src="../../public/fish.png" alt="Logo Icon" className="logo-icon" />
+                </div>
                 <nav className="top-nav-links">
                     <button onClick={() => setActiveView('dailies')} className={activeView === 'dailies' ? 'active' : ''}>
-                        🌞 My day
+                        <i class="bi bi-brightness-high-fill sun"></i> My day
                     </button>
                     <button onClick={() => setActiveView('todo')} className={activeView === 'todo' ? 'active' : ''}>
-                        📋 To-Do
+                        <i class="bi bi-clipboard-check-fill clipboard"></i> To-Do
                     </button>
                     <button onClick={() => setActiveView('habits')} className={activeView === 'habits' ? 'active' : ''}>
-                        📅 Habits
+                        <i class="bi bi-calendar-week-fill calendar"></i> Habits
                     </button>
                     <button onClick={() => setActiveView('goals')} className={activeView === 'goals' ? 'active' : ''}>
-                        🎯 Goals
+                        <i class="bi bi-bullseye target"></i> Goals
                     </button>
                 </nav>
 
                 {/* Hamburger Menu */}
-                <div className="hamburger-container">
-                    <button className="hamburger-icon" onClick={toggleMenu}>☰</button>
+                <div className="hamburger-container" ref={menuRef}>
+                    <button className="hamburger-icon" onClick={toggleMenu}><i class="bi bi-list"></i></button>
                     {menuOpen && (
                         <div className="hamburger-menu">
-                            <Button variant="outline-secondary" size="sm" className="menu-btn" onClick={goToSettings}>⚙️ Settings</Button>
+                            <Button variant="outline-secondary" size="sm" className="menu-btn" onClick={goToSettings}><i class="bi bi-file-lock2-fill password"></i> Change password</Button>
                             <Button variant="outline-danger" size="sm" className="menu-btn" onClick={handleLogout}>
-                                🔓 Logout
+                                <i class="bi bi-door-open-fill logout"></i> Logout
                             </Button>
                         </div>
                     )}
@@ -268,16 +286,22 @@ const Dashboard = () => {
                     </h2>
 
                     <div className="d-flex align-items-center gap-2">
+                        <Button variant="success" className="new-task" onClick={() => openAddPopup()}><i class="bi bi-plus-square-fill add"></i> New Task</Button>
                         {activeView === 'dailies' && (
-                            <input
-                                type="date"
-                                value={selectedDate.toLocaleDateString('en-CA')}
-                                onChange={(e) => setSelectedDate(new Date(e.target.value))}
-                                className="form-control"
-                                style={{ width: 'auto' }}
-                            />
+                            <div className="date-picker-wrapper" style={{ position: "relative", display: "inline-block" }}>
+                                <DatePicker
+                                    selected={selectedDate}
+                                    onChange={(date) => setSelectedDate(date)}
+                                    dateFormat="yyyy-MM-dd"
+                                    className="form-control aero-input"
+                                    calendarClassName="aero-calendar"
+                                />
+                                <div
+                                    className="calendar-icon"
+                                    onClick={() => document.querySelector(".react-datepicker__input-container input").focus()}
+                                />
+                            </div>
                         )}
-                        <Button variant="success" onClick={() => openAddPopup()}>➕ New Task</Button>
                     </div>
                 </div>
 
@@ -291,15 +315,24 @@ const Dashboard = () => {
                     {error && <Alert variant="danger">{error}</Alert>}
 
                     {!loading && !error && activeView === 'todo' && (
-                        <ToDoList tasks={filteredTasks.todo} onEdit={openEditPopup} onDelete={handleDelete} />
+                        <ToDoList tasks={filteredTasks.todo}
+                            onEdit={openEditPopup}
+                            onDelete={handleDelete}
+                            activeView={activeView}
+                        />
                     )}
 
                     {!loading && !error && activeView === 'dailies' && (
-                        <ToDoList tasks={filteredTasks.dailies} onEdit={openEditPopup} onDelete={handleDelete} />
+                        <ToDoList
+                            tasks={filteredTasks.dailies}
+                            onEdit={openEditPopup}
+                            onDelete={handleDelete}
+                            activeView={activeView}
+                        />
                     )}
 
                     {!loading && !error && activeView === 'habits' && (
-                        <ToDoList tasks={filteredTasks.habit} onEdit={openEditPopup} onDelete={handleDelete} />
+                        <ToDoList tasks={filteredTasks.habit} onEdit={openEditPopup} onDelete={handleDelete} activeView={activeView} />
                     )}
 
                     {!loading && !error && activeView === 'goals' && (
@@ -345,11 +378,17 @@ const Dashboard = () => {
                             {(activeView === 'todo' || activeView === 'dailies') && (
                                 <Form.Group className="mb-3">
                                     <Form.Label>Due Date</Form.Label>
-                                    <Form.Control
-                                        type="date"
-                                        name="dueDate"
-                                        value={currentTask.dueDate}
-                                        onChange={handleChange}
+                                    <DatePicker
+                                        selected={currentTask.dueDate ? new Date(currentTask.dueDate) : null}
+                                        onChange={(date) =>
+                                            setCurrentTask((prev) => ({
+                                                ...prev,
+                                                dueDate: date.toLocaleDateString('en-CA'),
+                                            }))
+                                        }
+                                        dateFormat="yyyy-MM-dd"
+                                        className="form-control aero-input"
+                                        calendarClassName="aero-calendar"
                                     />
                                 </Form.Group>
                             )}
@@ -463,7 +502,9 @@ const Dashboard = () => {
                     <strong> Your Novassistant:</strong><br /> {feedback}
                 </div>
             )}
-
+            <div className="bubbles">
+                {[...Array(10)].map((_, i) => <span key={i}></span>)}
+            </div>
         </div>
     );
 };
