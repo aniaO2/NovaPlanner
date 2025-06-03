@@ -37,7 +37,7 @@ namespace Organizer.Server.Models
 
         [BsonElement("dueTime")]
         [BsonIgnoreIfNull]
-        public TimeSpan? dueTime { get; set; }
+        public TimeSpan? DueTime { get; set; }
 
         [BsonElement("goalId")]
         [BsonIgnoreIfNull]

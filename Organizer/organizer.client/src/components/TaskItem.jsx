@@ -26,14 +26,20 @@ const TaskItem = ({ task, onEdit, onDelete, onQuickUpdate, activeView }) => {
     <div className="task-details">
         {activeView === 'dailies' && (
             <>
-                        <div><strong><i class="bi bi-calendar-week-fill calendar"></i> Due:</strong> {new Date(task.dueDate).toLocaleDateString('en-CA')}</div>
-                        <div><strong><i class="bi bi-alarm-fill clock"></i> Time:</strong> {task.dueTime || '—'}</div>
+                        <div><strong><i class="bi bi-calendar-week-fill calendar"></i> Due:</strong> {new Date(task.dueDate).toLocaleDateString('ro-RO', { day: '2-digit', month: '2-digit', year: 'numeric' })}</div>
+                        <div><strong><i class="bi bi-alarm-fill clock"></i> Time:</strong> {task.dueTime
+                            ? new Date(`1970-01-01T${task.dueTime}`).toLocaleTimeString('ro-RO', {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                hour12: false
+                            })
+                            : '—'}</div>
                         <div><strong><i class="bi bi-hourglass-split hourglass"></i> Estimated:</strong> {task.estimatedTime ?? '—'} hrs</div>
             </>
         )}
 
         {activeView === 'todo' && (
-                    <div><strong><i class="bi bi-calendar-week-fill calendar"></i> Due:</strong> {new Date(task.dueDate).toLocaleDateString('en-CA')}</div>
+                    <div><strong><i class="bi bi-calendar-week-fill calendar"></i> Due:</strong> {task.dueDate ? new Date(task.dueDate).toLocaleDateString('ro-RO', { day: '2-digit', month: '2-digit', year: 'numeric' }) : 'N/A'}</div>
         )}
 
         {activeView === 'habits' && (

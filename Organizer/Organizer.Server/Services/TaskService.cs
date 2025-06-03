@@ -64,6 +64,21 @@ namespace Organizer.Server.Services
             if (updatedTask.Streak != null)
                 updateDefs.Add(Builders<TaskItem>.Update.Set(t => t.Streak, updatedTask.Streak));
 
+            if (updatedTask.Progress != null)
+                updateDefs.Add(Builders<TaskItem>.Update.Set(t => t.Progress, updatedTask.Progress));
+
+            if (!string.IsNullOrWhiteSpace(updatedTask.Title))
+                updateDefs.Add(Builders<TaskItem>.Update.Set(t => t.Title, updatedTask.Title));
+
+            if (updatedTask.DueTime != null)
+                updateDefs.Add(Builders<TaskItem>.Update.Set(t => t.DueTime, updatedTask.DueTime));
+
+            if (updatedTask.EstimatedTime != null)
+                 updateDefs.Add(Builders<TaskItem>.Update.Set(t => t.EstimatedTime, updatedTask.EstimatedTime));
+
+            if (updatedTask.DueDate != default)
+                updateDefs.Add(Builders<TaskItem>.Update.Set(t => t.DueDate, updatedTask.DueDate));
+
             if (updateDefs.Count == 0) return;
 
             var update = Builders<TaskItem>.Update.Combine(updateDefs);

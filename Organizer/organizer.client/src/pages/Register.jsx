@@ -12,13 +12,23 @@ const Register = () => {
 
     const handleRegister = async (e) => {
         e.preventDefault();
+
+        const isValidEmail = (email) =>
+            /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email); 
+
+        if (!isValidEmail(email)) {
+            setError("Please enter a valid email address.");
+            return;
+        }
+
         try {
             await UserService.register(username, email, password);
-            navigate('/');
+            navigate('/', { replace: true });
         } catch {
             setError('Registration failed. Please try again.');
         }
     };
+
 
     return (
         <div className="wrapper">

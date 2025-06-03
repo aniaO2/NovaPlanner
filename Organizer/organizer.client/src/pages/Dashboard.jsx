@@ -38,6 +38,15 @@ const Dashboard = () => {
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [feedback, setFeedback] = useState(null);
 
+    const singularLabels = {
+        todo: 'Task',
+        dailies: 'Daily',
+        habits: 'Habit',
+        goals: 'Goal',
+        checkpoint: 'Checkpoint'
+    };
+
+
     const fetchTasks = async () => {
         setLoading(true);
         setError(null);
@@ -64,7 +73,7 @@ const Dashboard = () => {
         todo: tasks.filter(task => task.type === 'todo'),
         dailies: tasks.filter(task =>
             task.type === 'daily' &&
-            new Date(task.dueDate).toDateString() === selectedDate.toDateString()
+            new Date(task.dueDate).toLocaleDateString('ro-RO', { day: '2-digit', month: '2-digit', year: 'numeric' }) === selectedDate.toLocaleDateString('ro-RO', { day: '2-digit', month: '2-digit', year: 'numeric' })
         ),
         habit: tasks.filter(task => task.type === 'habit'),
         goal: tasks.filter(task => task.type === 'goal'),
@@ -86,7 +95,7 @@ const Dashboard = () => {
     const openAddPopup = (goalId = null) => {
         setIsEditing(false);
         setParentGoalId(goalId); // goalId is the ID or null
-        const today = new Date().toLocaleDateString('en-CA');
+        const today = new Date();
         setCurrentTask({
             title: '',
             isCompleted: false,
@@ -140,7 +149,7 @@ const Dashboard = () => {
         console.log(activeView);
         setCurrentTask({
             ...task,
-            dueDate: task.dueDate ? new Date(task.dueDate).toLocaleDateString('en-CA') : '',
+            dueDate: task.dueDate ? new Date(task.dueDate) : '',
             streak: task.streak ?? 0,
             progress: task.progress ?? 0,
         });
@@ -240,7 +249,7 @@ const Dashboard = () => {
             const userId = localStorage.getItem('userId');
             const todayDailies = tasks.filter(task =>
                 task.type === 'daily' &&
-                new Date(task.dueDate).toDateString() === selectedDate.toDateString()
+                new Date(task.dueDate).toLocaleDateString('ro-RO', { day: '2-digit', month: '2-digit', year: 'numeric' }) === selectedDate.toLocaleDateString('ro-RO', { day: '2-digit', month: '2-digit', year: 'numeric' })
             );
 
             const response = await axios.post('/assistant/evaluate-dailies', {
@@ -266,16 +275,17 @@ const Dashboard = () => {
                 </div>
                 <nav className="top-nav-links">
                     <button onClick={() => setActiveView('dailies')} className={activeView === 'dailies' ? 'active' : ''}>
-                        <i class="bi bi-brightness-high-fill sun"></i> My day
+                        <i class="bi bi-brightness-high-fill sun"></i> <span className = "aero-label">My day</span>
                     </button>
                     <button onClick={() => setActiveView('todo')} className={activeView === 'todo' ? 'active' : ''}>
-                        <i class="bi bi-clipboard-check-fill clipboard"></i> To-Do
+
+                        <i class="bi bi-clipboard-check-fill clipboard"></i> <span className="aero-label">To-Do</span>
                     </button>
                     <button onClick={() => setActiveView('habits')} className={activeView === 'habits' ? 'active' : ''}>
-                        <i class="bi bi-calendar-week-fill calendar"></i> Habits
+                        <i class="bi bi-calendar-week-fill calendar"></i> <span className="aero-label">Habits</span>
                     </button>
                     <button onClick={() => setActiveView('goals')} className={activeView === 'goals' ? 'active' : ''}>
-                        <i class="bi bi-bullseye target"></i> Goals
+                        <i class="bi bi-bullseye target"></i> <span className="aero-label">Goals</span>
                     </button>
                 </nav>
 
@@ -306,13 +316,15 @@ const Dashboard = () => {
                     </h2>
 
                     <div className="d-flex align-items-center gap-2">
-                        <Button variant="success" className="new-task" onClick={() => openAddPopup()}><i class="bi bi-plus-square-fill add"></i> New Task</Button>
+                        <Button variant="success" className="new-task" onClick={() => openAddPopup()}>
+                            <i className="bi bi-plus-square-fill add"></i><span className="aero-label"> New {singularLabels[activeView]}</span>
+                        </Button>
                         {activeView === 'dailies' && (
                             <div className="date-picker-wrapper" style={{ position: "relative", display: "inline-block" }}>
                                 <DatePicker
                                     selected={selectedDate}
                                     onChange={(date) => setSelectedDate(date)}
-                                    dateFormat="yyyy-MM-dd"
+                                    dateFormat="dd.MM.yyyy"
                                     className="form-control aero-filter"
                                     calendarClassName="aero-calendar"
                                 />
@@ -382,12 +394,14 @@ const Dashboard = () => {
             {showPopup && (
                 <div className="popup-overlay">
                     <div className="popup frutiger-aero-popup">
-                        <button className="popup-close" onClick={togglePopup}>✖</button>
-                        <h3 className="mb-3">{isEditing ? 'Edit Task' : 'Add New Task'}</h3>
+                        <button className="popup-close" onClick={togglePopup}><i class="bi bi-x x"></i></button>
+                        <h3 className="mb-3">
+                            {isEditing ? `Edit ${singularLabels[activeView]}` : `Add New ${singularLabels[activeView]}`}
+                        </h3>
                         <Form onSubmit={handleSubmit}>
                             {/* Title - shown for all types */}
                             <Form.Group className="mb-3">
-                                <Form.Label>Title</Form.Label>
+                                <Form.Label className="aero-label">Title</Form.Label>
                                 <Form.Control
                                     type="text"
                                     name="title"
@@ -401,16 +415,16 @@ const Dashboard = () => {
                             {/* Due Date - only for todo and dailies */}
                             {(activeView === 'todo' || activeView === 'dailies') && (
                                 <Form.Group className="mb-3">
-                                    <Form.Label>Due Date</Form.Label>
+                                    <Form.Label className="aero-label">Due Date</Form.Label>
                                     <DatePicker
                                         selected={currentTask.dueDate ? new Date(currentTask.dueDate) : null}
                                         onChange={(date) =>
                                             setCurrentTask((prev) => ({
                                                 ...prev,
-                                                dueDate: date.toLocaleDateString('en-CA'),
+                                                dueDate: date
                                             }))
                                         }
-                                        dateFormat="yyyy-MM-dd"
+                                        dateFormat="dd.MM.yyyy"
                                         className="form-control aero-input"
                                         calendarClassName="aero-calendar"
                                     />
@@ -421,7 +435,7 @@ const Dashboard = () => {
                             {activeView === 'dailies' && (
                                 <>
                                     <Form.Group className="mb-3">
-                                        <Form.Label>Estimated Time (hours)</Form.Label>
+                                        <Form.Label className="aero-label">Estimated Time (hours)</Form.Label>
                                         <Form.Control
                                             type="number"
                                             name="estimatedTime"
@@ -433,7 +447,7 @@ const Dashboard = () => {
                                         />
                                     </Form.Group>
                                     <Form.Group className="mb-3">
-                                        <Form.Label>Due Time</Form.Label>
+                                        <Form.Label className="aero-label">Due Time</Form.Label>
                                         <Form.Control
                                             type="time"
                                             name="dueTime"
@@ -448,7 +462,7 @@ const Dashboard = () => {
                             {/* Goals - progress only */}
                             {activeView === 'goals' && (
                                 <Form.Group className="mb-3">
-                                    <Form.Label>Progress (%)</Form.Label>
+                                    <Form.Label className="aero-label">Progress (%)</Form.Label>
                                     <Form.Control
                                         type="number"
                                         name="progress"
@@ -463,7 +477,7 @@ const Dashboard = () => {
 
                             {/* Button */}
                             <Button type="submit" variant="primary" className="w-100">
-                                {isEditing ? 'Save Changes' : 'Add Task'}
+                                {isEditing ? 'Save Changes' : `Add ${singularLabels[activeView]}`}
                             </Button>
                         </Form>
                     </div>
@@ -494,4 +508,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
- //comm for pushing

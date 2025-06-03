@@ -134,7 +134,7 @@ namespace Organizer.Server.Services
             var toAddress = new MailAddress(email);
             string subject = "NovaPlanner - Password Reset Link";
             string resetUrl = $"https://localhost:5173/reset-password?token={WebUtility.UrlEncode(token)}";
-            string body = $"Click the link to reset your password:\n{resetUrl}\nThis link will expire in 1 hour.";
+            string body = $"Click the link to reset your password:\n{resetUrl}\nThis link will expire in 1 hour. If you didn't request this link please change your password.";
 
             var smtp = new SmtpClient
             {

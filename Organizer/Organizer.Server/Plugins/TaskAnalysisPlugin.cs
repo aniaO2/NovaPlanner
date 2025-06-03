@@ -12,7 +12,7 @@ namespace Organizer.Server.Plugins
             var sb = new StringBuilder();
             foreach (var kpi in kpis.OrderByDescending(k => k.Date))
             {
-                sb.AppendLine($"Date: {kpi.Date:yyyy-MM-dd}, Estimated: {kpi.TotalEstimatedHours}h, Completion: {kpi.CompletionRate:P0}");
+                sb.AppendLine($"Date: {kpi.Date:dd-MM-yyyy}, Estimated: {kpi.TotalEstimatedHours}h, Completion: {kpi.CompletionRate:P0}");
             }
             return sb.ToString();
         }
