@@ -32,6 +32,7 @@ const Dashboard = () => {
 
     const [isEditing, setIsEditing] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
+    const feedbackRef = useRef(null);
     const menuRef = useRef(null);
     const [parentGoalId, setParentGoalId] = useState(null);
     const [selectedDate, setSelectedDate] = useState(new Date());
@@ -100,18 +101,27 @@ const Dashboard = () => {
 
     useEffect(() => {
         const handleClickOutside = (event) => {
-            if (menuRef.current && !menuRef.current.contains(event.target)) {
+            const clickedOutsideMenu = menuRef.current && !menuRef.current.contains(event.target);
+            const clickedOutsideFeedback = feedbackRef.current && !feedbackRef.current.contains(event.target);
+
+            if (menuOpen && clickedOutsideMenu) {
                 setMenuOpen(false);
             }
+
+            if (feedback && clickedOutsideFeedback) {
+                setFeedback(null);
+            }
         };
-        // Add listener only if menu is open
-        if (menuOpen) {
+
+        if (menuOpen || feedback) {
             document.addEventListener('mousedown', handleClickOutside);
         }
+
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [menuOpen]);
+    }, [menuOpen, feedback]);
+
 
 
     const openEditPopup = (task) => {
@@ -215,6 +225,16 @@ const Dashboard = () => {
         }
     };
 
+    const handleQuickUpdate = async (taskId, updatedFields) => {
+        try {
+            await axios.put(`/tasks/${taskId}`, updatedFields);
+            await fetchTasks();
+        } catch (error) {
+            console.error('Failed to quick-update task:', error.response?.data || error.message);
+        }
+    };
+
+
     const handleEvaluate = async () => {
         try {
             const userId = localStorage.getItem('userId');
@@ -293,7 +313,7 @@ const Dashboard = () => {
                                     selected={selectedDate}
                                     onChange={(date) => setSelectedDate(date)}
                                     dateFormat="yyyy-MM-dd"
-                                    className="form-control aero-input"
+                                    className="form-control aero-filter"
                                     calendarClassName="aero-calendar"
                                 />
                                 <div
@@ -318,6 +338,7 @@ const Dashboard = () => {
                         <ToDoList tasks={filteredTasks.todo}
                             onEdit={openEditPopup}
                             onDelete={handleDelete}
+                            onQuickUpdate={handleQuickUpdate}
                             activeView={activeView}
                         />
                     )}
@@ -327,12 +348,13 @@ const Dashboard = () => {
                             tasks={filteredTasks.dailies}
                             onEdit={openEditPopup}
                             onDelete={handleDelete}
+                            onQuickUpdate={handleQuickUpdate}
                             activeView={activeView}
                         />
                     )}
 
                     {!loading && !error && activeView === 'habits' && (
-                        <ToDoList tasks={filteredTasks.habit} onEdit={openEditPopup} onDelete={handleDelete} activeView={activeView} />
+                        <ToDoList tasks={filteredTasks.habit} onEdit={openEditPopup} onDelete={handleDelete} onQuickUpdate={handleQuickUpdate} activeView={activeView} />
                     )}
 
                     {!loading && !error && activeView === 'goals' && (
@@ -346,6 +368,7 @@ const Dashboard = () => {
                                         checkpoints={checkpoints}
                                         onEdit={openEditPopup}
                                         onDelete={handleDelete}
+                                        onQuickUpdate={handleQuickUpdate}
                                         onAddCheckpoint={openAddPopup}
                                     />
                                 );
@@ -358,9 +381,9 @@ const Dashboard = () => {
 
             {showPopup && (
                 <div className="popup-overlay">
-                    <div className="popup">
+                    <div className="popup frutiger-aero-popup">
                         <button className="popup-close" onClick={togglePopup}>✖</button>
-                        <h4 className="mb-3">{isEditing ? 'Edit Task' : 'Add New Task'}</h4>
+                        <h3 className="mb-3">{isEditing ? 'Edit Task' : 'Add New Task'}</h3>
                         <Form onSubmit={handleSubmit}>
                             {/* Title - shown for all types */}
                             <Form.Group className="mb-3">
@@ -371,6 +394,7 @@ const Dashboard = () => {
                                     value={currentTask.title}
                                     onChange={handleChange}
                                     required
+                                    className="aero-input"
                                 />
                             </Form.Group>
 
@@ -405,6 +429,7 @@ const Dashboard = () => {
                                             min={0}
                                             max={24}
                                             onChange={handleChange}
+                                            className="aero-input"
                                         />
                                     </Form.Group>
                                     <Form.Group className="mb-3">
@@ -414,23 +439,10 @@ const Dashboard = () => {
                                             name="dueTime"
                                             value={currentTask.dueTime || ''}
                                             onChange={handleChange}
+                                            className="aero-input"
                                         />
                                     </Form.Group>
                                 </>
-                            )}
-
-                            {/* Habits - streak only */}
-                            {activeView === 'habits' && (
-                                <Form.Group className="mb-3">
-                                    <Form.Label>Streak</Form.Label>
-                                    <Form.Control
-                                        type="number"
-                                        name="streak"
-                                        value={currentTask.streak}
-                                        min={0}
-                                        onChange={handleChange}
-                                    />
-                                </Form.Group>
                             )}
 
                             {/* Goals - progress only */}
@@ -444,21 +456,12 @@ const Dashboard = () => {
                                         min={0}
                                         max={100}
                                         onChange={handleChange}
+                                        className="aero-input"
                                     />
                                 </Form.Group>
                             )}
 
-                            {/* All types get isCompleted checkbox */}
-                            <Form.Group className="mb-3">
-                                <Form.Check
-                                    type="checkbox"
-                                    label="Completed"
-                                    name="isCompleted"
-                                    checked={currentTask.isCompleted}
-                                    onChange={handleChange}
-                                />
-                            </Form.Group>
-
+                            {/* Button */}
                             <Button type="submit" variant="primary" className="w-100">
                                 {isEditing ? 'Save Changes' : 'Add Task'}
                             </Button>
@@ -466,40 +469,21 @@ const Dashboard = () => {
                     </div>
                 </div>
             )}
-            {/* Butonul cu beculeț */}
-            <button
-                onClick={handleEvaluate}
-                title="Evaluate today's plan"
-                style={{
-                    position: 'fixed',
-                    bottom: '20px',
-                    right: '20px',
-                    backgroundColor: '#fff',
-                    borderRadius: '50%',
-                    padding: '10px',
-                    boxShadow: '0 0 10px rgba(0,0,0,0.2)',
-                    cursor: 'pointer',
-                    zIndex: 1000,
-                }}
-            > <i class="bi bi-lightbulb-fill lightbulb"></i>
-            </button>
 
-            {/* Feedback asistent */}
+            {/* Nova Assistant Button */}
+            <div className="nova-button-container" onClick={handleEvaluate} title="Evaluate today's plan">
+                <div className="nova-button">
+                    <img src="/nova.png" alt="Nova" className="nova-icon" />
+                </div>
+                <span className="nova-label">Ask Nova about your daily plan</span>
+            </div>
+
+            {/* Feedback bubble */}
             {feedback && (
-                <div
-                    style={{
-                        position: 'fixed',
-                        bottom: '80px',
-                        right: '20px',
-                        backgroundColor: '#f9fafb',
-                        padding: '12px 16px',
-                        borderRadius: '8px',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                        maxWidth: '300px',
-                        zIndex: 1000,
-                    }}
-                >
-                    <strong> Your Novassistant:</strong><br /> {feedback}
+                <div className="nova-feedback" ref={feedbackRef}>
+                    <div className="speech-bubble">
+                        <strong>Nova says:</strong><br /> {feedback}
+                    </div>
                 </div>
             )}
             <div className="bubbles">

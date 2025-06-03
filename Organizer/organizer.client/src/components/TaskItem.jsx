@@ -1,64 +1,70 @@
-import React from 'react';
+ï»¿import React from 'react';
 import { Button } from 'react-bootstrap';
 
-const TaskItem = ({ task, onEdit, onDelete, activeView }) => {
+const TaskItem = ({ task, onEdit, onDelete, onQuickUpdate, activeView }) => {
     const handleStreakIncrement = () => {
-        const updatedTask = { ...task, streak: (task.streak || 0) + 1 };
-        onEdit(updatedTask);
+        const newStreak = (task.streak || 0) + 1;
+        onQuickUpdate(task._id, { streak: newStreak });
     };
     return (
         <div className="task-card">
-            <div className="task-checkbox-title">
-                <label className="aero-checkbox">
-                    <input
-                        type="checkbox"
-                        checked={task.isCompleted}
-                        onChange={() => onEdit({ ...task, isCompleted: !task.isCompleted })}
-                    />
-                    <span className="custom-check"></span>
-                </label>
-                <h5>{task.title}</h5>
-            </div>
-            {activeView == "dailies" && (
-                <>
-                    <p><strong>Due:</strong> {new Date(task.dueDate).toLocaleDateString('en-CA') || 'N/A'}</p>
-                    <p><strong>Time:</strong> {task.dueTime || '—'}</p>
-                    <p><strong>Estimated hours:</strong> {task.estimatedTime ?? '—'}</p>
-                </>
-            )} 
-            {activeView == 'todo' && (
-                <p><strong>Due:</strong> {new Date(task.dueDate).toLocaleDateString('en-CA') || 'N/A'}</p>
-            )}
-            {activeView == 'habits' && (
-                <div className="d-flex align-items-center gap-2">
-                    <p>
-                        <strong>Streak:</strong> {task.streak}
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation(); // prevent parent click events if any
-                                handleStreakIncrement(task._id);
-                            }}
-                            style={{ marginLeft: '8px' }}
-                            title="Increase streak"
-                        >
-                            +
-                        </button>
-                    </p>
+    <div className="task-header">
+                {activeView !== 'habits' && (
+                    <label className="aero-checkbox">
+                        <input
+                            type="checkbox"
+                            checked={task.isCompleted}
+                            onChange={(e) => onQuickUpdate(task._id, { isCompleted: e.target.checked })}
+                            onClick={(e) => e.stopPropagation()}
+                        />
+                        <span className="custom-check"></span>
+                    </label>
+                )}
+        <h5 className="task-title">{task.title}</h5>
+    </div>
 
-                </div>
-            )}
-            {activeView == 'goals' && (
-                <p><strong>Progress:</strong> {task.progress ?? 0}%</p>
-            )}
-            <div className="actions">
-                <Button variant="outline-primary" size="sm" onClick={() => onEdit(task)}>
-                    <i className="bi bi-pencil-fill edit"></i>
-                </Button>
-                <Button variant="outline-danger" size="sm" onClick={() => onDelete(task._id)}>
-                    <i className="bi bi-trash2-fill delete"></i>
-                </Button>
+    <div className="task-details">
+        {activeView === 'dailies' && (
+            <>
+                        <div><strong><i class="bi bi-calendar-week-fill calendar"></i> Due:</strong> {new Date(task.dueDate).toLocaleDateString('en-CA')}</div>
+                        <div><strong><i class="bi bi-alarm-fill clock"></i> Time:</strong> {task.dueTime || 'â€”'}</div>
+                        <div><strong><i class="bi bi-hourglass-split hourglass"></i> Estimated:</strong> {task.estimatedTime ?? 'â€”'} hrs</div>
+            </>
+        )}
+
+        {activeView === 'todo' && (
+                    <div><strong><i class="bi bi-calendar-week-fill calendar"></i> Due:</strong> {new Date(task.dueDate).toLocaleDateString('en-CA')}</div>
+        )}
+
+        {activeView === 'habits' && (
+            <div className="streak-row">
+                        <strong><i class="bi bi-fire fire"></i> Streak:</strong> {task.streak}
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        handleStreakIncrement();
+                    }}
+                    className="streak-btn"
+                    title="Increase streak"
+                        ><i class="bi bi-plus plus"></i></button>
             </div>
-        </div>
+        )}
+
+        {activeView === 'goals' && (
+                    <div><strong><i class="bi bi-graph-up-arrow chart"></i> Progress:</strong> {task.progress ?? 0}%</div>
+        )}
+    </div>
+
+    <div className="actions">
+        <Button variant="outline-primary" size="sm" onClick={() => onEdit(task)}>
+            <i className="bi bi-pencil-fill edit"></i>
+        </Button>
+        <Button variant="outline-danger" size="sm" onClick={() => onDelete(task._id)}>
+            <i className="bi bi-trash2-fill delete"></i>
+        </Button>
+    </div>
+</div>
+
     );
 };
 

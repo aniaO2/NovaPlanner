@@ -54,12 +54,26 @@ namespace Organizer.Server.Services
         public async Task UpdateAsync(string id, TaskItem updatedTask)
         {
             var userId = GetUserIdFromClaims();
-            if (userId != null)
-            {
-                updatedTask.UserId = userId;
-                await _tasks.ReplaceOneAsync(t => t.Id == id && t.UserId == userId, updatedTask);
-            }
+            if (userId == null) return;
+
+            var updateDefs = new List<UpdateDefinition<TaskItem>>();
+
+            if (updatedTask.IsCompleted != null)
+                updateDefs.Add(Builders<TaskItem>.Update.Set(t => t.IsCompleted, updatedTask.IsCompleted));
+
+            if (updatedTask.Streak != null)
+                updateDefs.Add(Builders<TaskItem>.Update.Set(t => t.Streak, updatedTask.Streak));
+
+            if (updateDefs.Count == 0) return;
+
+            var update = Builders<TaskItem>.Update.Combine(updateDefs);
+
+            await _tasks.UpdateOneAsync(
+                t => t.Id == id && t.UserId == userId,
+                update
+            );
         }
+
 
 
         // Delete a task

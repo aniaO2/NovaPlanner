@@ -78,88 +78,136 @@ button {
 
 .edit {
     color: #fbb905;
-    background: linear-gradient(145deg, #fbb905, transparent);
+    background: linear-gradient(145deg, #fff3c1, #fbb905, #c49000);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    text-shadow: 0px 1px 2px transparent;
+    text-shadow: 0 1px 1px rgba(251, 185, 5, 0.6), 0 2px 5px rgba(251, 185, 5, 0.3);
 }
 
-.delete{
+.delete {
     color: #ff4d4d;
-    background: linear-gradient(145deg, #ff4d4d, transparent);
+    background: linear-gradient(145deg, #ffb3b3, #ff4d4d, #990000);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    text-shadow: 0px 1px 2px transparent;
-
+    text-shadow: 0 1px 1px rgba(255, 77, 77, 0.6), 0 2px 5px rgba(255, 77, 77, 0.3);
 }
 
-.checkpoint{
+.checkpoint {
     color: #00ffcc;
-    background: linear-gradient(145deg, #00ffcc, transparent);
+    background: linear-gradient(145deg, #c6fff2, #00ffcc, #00aa88);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    text-shadow: 0px 1px 2px transparent;
+    text-shadow: 0 1px 1px rgba(0, 255, 204, 0.5), 0 2px 5px rgba(0, 255, 204, 0.3);
 }
 
-.lightbulb{
+.lightbulb {
     color: #ffcc00;
-    background: linear-gradient(145deg, #ffcc00, transparent);
+    background: linear-gradient(145deg, #fff5c0, #ffcc00, #d6aa00);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    text-shadow: 0px 1px 2px transparent;
-
+    text-shadow: 0 1px 1px rgba(255, 204, 0, 0.6), 0 2px 4px rgba(255, 204, 0, 0.3);
 }
 
-.sun{
+.sun {
     color: #ff9900;
-    background: linear-gradient(145deg, #ff9900, transparent);
+    background: linear-gradient(145deg, #ffd080, #ff9900, #cc6600);
     -webkit-background-clip: text;
-    text-shadow: 0px 1px 2px transparent;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 1px 1px rgba(255, 180, 100, 0.6), 0 2px 4px rgba(255, 153, 0, 0.4);
 }
 
 .clipboard {
     color: #00ad6b;
-    background: linear-gradient(145deg, #00ad6b, transparent);
+    background: linear-gradient(145deg, #a0ffe2, #00ad6b, #00774c);
     -webkit-background-clip: text;
-    text-shadow: 0px 1px 2px transparent;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 1px 1px rgba(0, 173, 107, 0.6), 0 2px 4px rgba(0, 173, 107, 0.3);
 }
 
 .calendar {
     color: #535bf2;
-    background: linear-gradient(145deg, #535bf2, transparent);
+    background: linear-gradient(145deg, #e0e6ff, #7c87ff, #3f48ff);
     -webkit-background-clip: text;
-    text-shadow: 0px 1px 2px transparent;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 1px 2px rgba(83, 91, 242, 0.5), 0 3px 6px rgba(83, 91, 242, 0.25), 0 0 8px rgba(150, 170, 255, 0.4);
 }
 
-.target{
+.target {
     color: #ff4d4d;
-    background: linear-gradient(145deg, #ff4d4d, transparent);
+    background: linear-gradient(145deg, #ffb3b3, #ff4d4d, #b30000);
     -webkit-background-clip: text;
-    text-shadow: 0px 1px 2px transparent;
-
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 1px 1px rgba(255, 100, 100, 0.6), 0 2px 5px rgba(255, 77, 77, 0.3);
 }
 
 .add {
     color: rgb(0, 148, 255);
-    background: linear-gradient(145deg, rgb(0, 148, 255), transparent);
+    background: linear-gradient(145deg, #b3e5ff, rgb(0, 148, 255), #0066cc);
     -webkit-background-clip: text;
-    text-shadow: 0px 1px 2px transparent;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 1px 1px rgba(0, 148, 255, 0.5), 0 2px 5px rgba(0, 148, 255, 0.3);
 }
 
-.logout{
+.logout {
     color: #ff4d4d;
-    background: linear-gradient(145deg, #ff4d4d, transparent);
+    background: linear-gradient(145deg, #ffb3b3, #ff4d4d, #990000);
     -webkit-background-clip: text;
-    text-shadow: 0px 1px 2px transparent;
-
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 1px 1px rgba(255, 77, 77, 0.5), 0 2px 5px rgba(255, 77, 77, 0.3);
 }
 
-.password{
+.password {
     color: #11438f;
-    background: linear-gradient(145deg, #0e7b6f, transparent);
+    background: linear-gradient(145deg, #8cd3cb, #0e7b6f, #004c44);
     -webkit-background-clip: text;
-    text-shadow: 0px 1px 2px transparent;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 1px 1px rgba(14, 123, 111, 0.5), 0 2px 4px rgba(14, 123, 111, 0.3);
+}
 
+
+.clock {
+    color: #00bcd4;
+    background: linear-gradient(145deg, #c3f6ff, #00bcd4, #007a99);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 1px 1px rgba(0, 188, 212, 0.6), 0 2px 4px rgba(0, 188, 212, 0.3);
+}
+
+
+.chart {
+    color: #00cc66;
+    background: linear-gradient(145deg, #caffd8, #00cc66, #007744);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 1px 1px rgba(0, 204, 102, 0.6), 0 2px 4px rgba(0, 204, 102, 0.3);
+}
+
+.hourglass {
+    color: #00bfff;
+    background: linear-gradient(145deg, #d4faff, #00bfff, #0077b3);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 1px 1px rgba(0, 191, 255, 0.6), 0 2px 4px rgba(0, 191, 255, 0.3);
+}
+
+
+.fire{
+    color: #ff6600;
+    background: linear-gradient(145deg, #ffb380, #ff6600, #cc3300);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 1px 1px rgba(255, 102, 0, 0.6), 0 2px 4px rgba(255, 102, 0, 0.3);
+}
+
+.plus {
+    margin:0 0.25rem 0 0.25rem;
+    font-size: 1.5rem;
+    font-weight: 1000;
+    color: #1d7bbd;
+    background: linear-gradient(to bottom right, #3eaee0, #1d7bbd, #68d0e0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 1px 1px rgba(0, 230, 184, 0.6), 0 2px 4px rgba(0, 230, 184, 0.3);
 }
 
 .form-group {
