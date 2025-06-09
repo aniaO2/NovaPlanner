@@ -40,7 +40,7 @@ namespace Organizer.Server.Services
                 task.UserId = userId;
 
                 // Optionally initialize values depending on type
-                if (task.Type == "daily" && task.Streak == null)
+                if (task.Type == "habit" && task.Streak == null)
                     task.Streak = 0;
 
                 if (task.Type == "goal" && task.Progress == null)

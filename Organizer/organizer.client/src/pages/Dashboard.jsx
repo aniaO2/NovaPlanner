@@ -2,10 +2,10 @@
 import { Button, Form, Spinner, Alert } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from 'react-router-dom';
 import axios from '../api/AxiosInstance';
 
-import GoalWithCheckpoints from '../components/GoalWithCheckpoints';
 import ToDoList from '../components/ToDoList';
 
 import '../styles/Dashboard.css';
@@ -85,8 +85,8 @@ const Dashboard = () => {
         navigate('/', { replace: true });
     };
 
-    const goToSettings = () => {
-        navigate('/settings');
+    const goToChangePassword = () => {
+        navigate('/change-password');
     };
 
     const togglePopup = () => setShowPopup(prev => !prev);
@@ -294,7 +294,7 @@ const Dashboard = () => {
                     <button className="hamburger-icon" onClick={toggleMenu}><i class="bi bi-list"></i></button>
                     {menuOpen && (
                         <div className="hamburger-menu">
-                            <Button variant="outline-secondary" size="sm" className="menu-btn" onClick={goToSettings}><i class="bi bi-file-lock2-fill password"></i> Change password</Button>
+                            <Button variant="outline-secondary" size="sm" className="menu-btn" onClick={goToChangePassword}><i class="bi bi-file-lock2-fill password"></i> Change password</Button>
                             <Button variant="outline-danger" size="sm" className="menu-btn" onClick={handleLogout}>
                                 <i class="bi bi-door-open-fill logout"></i> Logout
                             </Button>
@@ -338,62 +338,54 @@ const Dashboard = () => {
                 </div>
 
 
-                <div>
-                    {loading && (
-                        <div className="d-flex my-4">
-                            <Spinner animation="border" />
-                        </div>
-                    )}
-                    {error && <Alert variant="danger">{error}</Alert>}
+                {!loading && !error && (
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={activeView}
+                            initial={{ opacity: 0, x: 50 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -50 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            <ToDoList
+                                tasks={
+                                    activeView === 'todo'
+                                        ? filteredTasks.todo
+                                        : activeView === 'dailies'
+                                            ? filteredTasks.dailies
+                                            : activeView === 'habits'
+                                                ? filteredTasks.habit
+                                                : [...filteredTasks.goal, ...filteredTasks.checkpoint]
+                                }
+                                onEdit={openEditPopup}
+                                onDelete={handleDelete}
+                                onQuickUpdate={handleQuickUpdate}
+                                onAddCheckpoint={openAddPopup}
+                                activeView={activeView}
+                            />
+                        </motion.div>
+                    </AnimatePresence>
+                )}
 
-                    {!loading && !error && activeView === 'todo' && (
-                        <ToDoList tasks={filteredTasks.todo}
-                            onEdit={openEditPopup}
-                            onDelete={handleDelete}
-                            onQuickUpdate={handleQuickUpdate}
-                            activeView={activeView}
-                        />
-                    )}
-
-                    {!loading && !error && activeView === 'dailies' && (
-                        <ToDoList
-                            tasks={filteredTasks.dailies}
-                            onEdit={openEditPopup}
-                            onDelete={handleDelete}
-                            onQuickUpdate={handleQuickUpdate}
-                            activeView={activeView}
-                        />
-                    )}
-
-                    {!loading && !error && activeView === 'habits' && (
-                        <ToDoList tasks={filteredTasks.habit} onEdit={openEditPopup} onDelete={handleDelete} onQuickUpdate={handleQuickUpdate} activeView={activeView} />
-                    )}
-
-                    {!loading && !error && activeView === 'goals' && (
-                        <div className="task-columns">
-                            {filteredTasks.goal.map(goal => {
-                                const checkpoints = filteredTasks.checkpoint.filter(cp => cp.goalId === goal._id);
-                                return (
-                                    <GoalWithCheckpoints
-                                        key={goal._id}
-                                        goal={goal}
-                                        checkpoints={checkpoints}
-                                        onEdit={openEditPopup}
-                                        onDelete={handleDelete}
-                                        onQuickUpdate={handleQuickUpdate}
-                                        onAddCheckpoint={openAddPopup}
-                                    />
-                                );
-                            })}
-                        </div>
-                    )}
-                </div>
 
             </main>
 
-            {showPopup && (
-                <div className="popup-overlay">
-                    <div className="popup frutiger-aero-popup">
+            <AnimatePresence>
+                {showPopup && (
+                    <motion.div
+                        className="popup-overlay"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                    >
+                        <motion.div
+                            className="popup frutiger-aero-popup"
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.8, opacity: 0 }}
+                            transition={{ duration: 0.3 }}
+                        >
+
                         <button className="popup-close" onClick={togglePopup}><i class="bi bi-x x"></i></button>
                         <h3 className="mb-3">
                             {isEditing ? `Edit ${singularLabels[activeView]}` : `Add New ${singularLabels[activeView]}`}
@@ -480,9 +472,10 @@ const Dashboard = () => {
                                 {isEditing ? 'Save Changes' : `Add ${singularLabels[activeView]}`}
                             </Button>
                         </Form>
-                    </div>
-                </div>
-            )}
+                        </motion.div>
+                  </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Nova Assistant Button */}
             <div className="nova-button-container" onClick={handleEvaluate} title="Evaluate today's plan">
