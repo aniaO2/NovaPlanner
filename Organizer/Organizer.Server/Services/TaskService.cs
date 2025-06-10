@@ -31,6 +31,23 @@ namespace Organizer.Server.Services
             return await _tasks.Find(t => t.UserId == userId && t.Type == type).ToListAsync();
         }
 
+        //Get tasks filtered by id
+        public async Task<TaskItem?> GetByIdAsync(string id)
+        {
+            return await _tasks.Find(t => t.Id == id).FirstOrDefaultAsync();
+        }
+
+        public async Task MarkAllCheckpointsCompletedAsync(string goalId, string userId)
+        {
+            var filter = Builders<TaskItem>.Filter.Where(t =>
+                t.GoalId == goalId && t.Type == "checkpoint" && t.UserId == userId);
+
+            var update = Builders<TaskItem>.Update.Set(t => t.IsCompleted, true);
+
+            await _tasks.UpdateManyAsync(filter, update);
+        }
+
+
         // Create a new task for the current user
         public async Task CreateAsync(TaskItem task)
         {

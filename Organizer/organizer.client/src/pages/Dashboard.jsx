@@ -78,9 +78,8 @@ const Dashboard = () => {
     }, []);
 
     const filteredTasks = useMemo(() => {
-        const matchesCompletion = (task => 
-           showCompleted === 'all' || task.isCompleted === showCompleted
-        );
+        const matchesCompletion = (task) =>
+            task.type === 'habit' ? true : (showCompleted === 'all' || task.isCompleted === showCompleted);
 
         return {
             todo: tasks.filter(task =>
@@ -201,7 +200,8 @@ const Dashboard = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         console.log('parentGoalId:', parentGoalId);
-        // For dailies: validate estimated time total does not exceed 24 hours
+
+        // Validate estimated time total for dailies
         if (activeView === 'dailies') {
             const totalEstimatedTime = filteredTasks.dailies
                 .filter(t => (isEditing ? t._id !== currentTask._id : true))
@@ -213,31 +213,44 @@ const Dashboard = () => {
                 return;
             }
         }
+
+        // Prepare payload
+        const isGoal = activeView === 'goals';
+        const progress = isGoal ? Number(currentTask.progress) : null;
+        const isCompleted = isGoal && progress === 100 ? true : currentTask.isCompleted;
+
         const payload = {
             ...currentTask,
-            type:
-                isEditing ? currentTask.type :
-                    parentGoalId ? 'checkpoint' :
-                        activeView === 'habits' ? 'habit' :
-                            activeView === 'goals' ? 'goal' :
-                                activeView === 'dailies' ? 'daily' :
-                                    'todo',
+            type: isEditing ? currentTask.type :
+                parentGoalId ? 'checkpoint' :
+                    activeView === 'habits' ? 'habit' :
+                        activeView === 'goals' ? 'goal' :
+                            activeView === 'dailies' ? 'daily' :
+                                'todo',
 
             dueDate: currentTask.dueDate ? new Date(currentTask.dueDate) : new Date(),
             streak: activeView === 'habits' ? Number(currentTask.streak) : null,
-            progress: activeView === 'goals' ? Number(currentTask.progress) : null,
+            progress,
             estimatedTime: activeView === 'dailies' ? Number(currentTask.estimatedTime || 0) : null,
             dueTime: activeView === 'dailies' && currentTask.dueTime ? currentTask.dueTime : null,
-            goalId: isEditing ? currentTask.goalId : parentGoalId, // null for non-checkpoints
+            goalId: isEditing ? currentTask.goalId : parentGoalId,
+            isCompleted
         };
 
-
         try {
+            // Create or update the task
             if (isEditing) {
                 await axios.put(`/tasks/${currentTask._id}`, payload);
             } else {
                 await axios.post('/tasks', payload);
             }
+
+            // If goal is fully completed, mark all its checkpoints in backend
+            if (isGoal && progress === 100) {
+                await axios.put(`/tasks/goals/${currentTask._id}/complete`);
+            }
+
+            // Reset form
             togglePopup();
             setCurrentTask({
                 title: '',
@@ -248,14 +261,17 @@ const Dashboard = () => {
                 estimatedTime: '',
                 dueTime: '',
             });
+
+            // Refresh tasks and state
             await fetchTasks();
             if (!isEditing && parentGoalId) {
-                setParentGoalId(null); // Only reset if we just created a checkpoint
+                setParentGoalId(null);
             }
         } catch (error) {
             console.error('Failed to save task:', error);
         }
     };
+
 
     const handleDelete = async (taskId) => {
         if (!window.confirm('Are you sure you want to delete this task?')) return;
@@ -379,6 +395,7 @@ const Dashboard = () => {
                                         const value = selectedOption.value;
                                         setShowCompleted(value === 'all' ? 'all' : value === 'true');
                                     }}
+                                    isSearchable={false}
                                     styles={{
                                         control: (base) => ({
                                             ...base,

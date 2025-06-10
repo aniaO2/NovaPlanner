@@ -67,5 +67,28 @@ namespace Organizer.Server.Controllers
             await _taskService.DeleteAsync(id);
             return NoContent();
         }
+
+        // PUT: api/tasks/goals/{goalId}/complete
+        [HttpPut("goals/{goalId}/complete")]
+        public async Task<IActionResult> CompleteGoal(string goalId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var goal = await _taskService.GetByIdAsync(goalId);
+            if (goal == null || goal.Type != "goal" || goal.UserId != userId)
+            {
+                return NotFound("Goal not found or unauthorized.");
+            }
+
+            goal.IsCompleted = true;
+            goal.Progress = 100;
+            await _taskService.UpdateAsync(goal.Id, goal);
+
+            await _taskService.MarkAllCheckpointsCompletedAsync(goal.Id, userId);
+
+            return NoContent();
+        }
+
+
     }
 }
