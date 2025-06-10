@@ -97,9 +97,14 @@ namespace Organizer.Server.Services
             var userId = GetUserIdFromClaims();
             if (userId != null)
             {
+                // Delete the main task
                 await _tasks.DeleteOneAsync(t => t.Id == id && t.UserId == userId);
+
+                // Delete related tasks with parentGoalId == id
+                await _tasks.DeleteManyAsync(t => t.GoalId == id && t.UserId == userId);
             }
         }
+
 
         private string? GetUserIdFromClaims()
         {

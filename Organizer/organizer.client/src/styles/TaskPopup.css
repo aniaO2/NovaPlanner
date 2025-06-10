@@ -43,6 +43,12 @@
     margin: 0 0 1rem 1rem;
 }
 
+    .aero-input::-webkit-outer-spin-button,
+    .aero-input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
 .frutiger-aero-popup .form-group {
     margin-bottom: 0.75rem;
 }

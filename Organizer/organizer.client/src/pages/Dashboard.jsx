@@ -1,15 +1,16 @@
-﻿import React, { useState, useRef, useEffect } from 'react';
+﻿import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Button, Form, Spinner, Alert } from 'react-bootstrap';
+import { motion, AnimatePresence } from 'framer-motion'
 import DatePicker from 'react-datepicker';
+import Select from 'react-select'
 import 'react-datepicker/dist/react-datepicker.css';
-import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from 'react-router-dom';
 import axios from '../api/AxiosInstance';
 
 import ToDoList from '../components/ToDoList';
+import TaskPopup from '../components/TaskPopup';
 
 import '../styles/Dashboard.css';
-import '../styles/TaskPopup.css';
 
 const Dashboard = () => {
     const [activeView, setActiveView] = useState('dailies');
@@ -36,6 +37,7 @@ const Dashboard = () => {
     const menuRef = useRef(null);
     const [parentGoalId, setParentGoalId] = useState(null);
     const [selectedDate, setSelectedDate] = useState(new Date());
+    const [showCompleted, setShowCompleted] = useState('all');
     const [feedback, setFeedback] = useState(null);
 
     const singularLabels = {
@@ -45,6 +47,12 @@ const Dashboard = () => {
         goals: 'Goal',
         checkpoint: 'Checkpoint'
     };
+
+    const options = [
+        { value: 'all', label: 'All Tasks' },
+        { value: 'true', label: 'Completed' },
+        { value: 'false', label: 'In Progress' },
+    ];
 
 
     const fetchTasks = async () => {
@@ -69,16 +77,42 @@ const Dashboard = () => {
         fetchTasks();
     }, []);
 
-    const filteredTasks = {
-        todo: tasks.filter(task => task.type === 'todo'),
-        dailies: tasks.filter(task =>
-            task.type === 'daily' &&
-            new Date(task.dueDate).toLocaleDateString('ro-RO', { day: '2-digit', month: '2-digit', year: 'numeric' }) === selectedDate.toLocaleDateString('ro-RO', { day: '2-digit', month: '2-digit', year: 'numeric' })
-        ),
-        habit: tasks.filter(task => task.type === 'habit'),
-        goal: tasks.filter(task => task.type === 'goal'),
-        checkpoint: tasks.filter(task => task.type === 'checkpoint'),
-    };
+    const filteredTasks = useMemo(() => {
+        const matchesCompletion = (task => 
+           showCompleted === 'all' || task.isCompleted === showCompleted
+        );
+
+        return {
+            todo: tasks.filter(task =>
+                task.type === 'todo' && matchesCompletion(task)
+            ),
+            dailies: tasks.filter(task =>
+                task.type === 'daily' &&
+                matchesCompletion(task) &&
+                new Date(task.dueDate).toLocaleDateString('ro-RO', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                }) === selectedDate.toLocaleDateString('ro-RO', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                })
+            ),
+            habit: tasks.filter(task =>
+                task.type === 'habit' && matchesCompletion(task)
+            ),
+            goal: tasks.filter(task =>
+                task.type === 'goal' && matchesCompletion(task)
+            ),
+            checkpoint: tasks.filter(task =>
+                task.type === 'checkpoint' && matchesCompletion(task)
+            ),
+        };
+    }, [tasks, selectedDate, showCompleted]);
+
+
+
 
     const handleLogout = () => {
         localStorage.removeItem('token');
@@ -304,7 +338,7 @@ const Dashboard = () => {
             </header>
 
             <main className="main-content">
-                <div className="header d-flex justify-content-between align-items-center">
+                <div className="header ">
                     <h2>
                         {activeView === 'todo'
                             ? 'To-Do Tasks'
@@ -315,12 +349,13 @@ const Dashboard = () => {
                                     : 'Goals'}
                     </h2>
 
-                    <div className="d-flex align-items-center gap-2">
+                    <div className="toolbar">
                         <Button variant="success" className="new-task" onClick={() => openAddPopup()}>
                             <i className="bi bi-plus-square-fill add"></i><span className="aero-label"> New {singularLabels[activeView]}</span>
                         </Button>
+                        <div className="filters">
                         {activeView === 'dailies' && (
-                            <div className="date-picker-wrapper" style={{ position: "relative", display: "inline-block" }}>
+                            <div className="date-picker-wrapper">
                                 <DatePicker
                                     selected={selectedDate}
                                     onChange={(date) => setSelectedDate(date)}
@@ -333,9 +368,61 @@ const Dashboard = () => {
                                     onClick={() => document.querySelector(".react-datepicker__input-container input").focus()}
                                 />
                             </div>
-                        )}
+                            )}
+                        
+                            <div>
+                                <Select
+                                    classNamePrefix="aero-select"
+                                    options={options}
+                                    value={options.find(opt => String(opt.value) === String(showCompleted))}
+                                    onChange={(selectedOption) => {
+                                        const value = selectedOption.value;
+                                        setShowCompleted(value === 'all' ? 'all' : value === 'true');
+                                    }}
+                                    styles={{
+                                        control: (base) => ({
+                                            ...base,
+                                            background: 'linear-gradient(to bottom right, rgba(173, 239, 255, 0.85), rgba(192, 255, 240, 0.9))',
+                                            borderRadius: 12,
+                                            borderColor: 'rgba(0, 180, 200, 0.6)',
+                                            boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.9), 0 2px 4px rgba(0,120,160,0.3)',
+                                            color: '#00575d',
+                                            fontSize: 15,
+                                            minHeight: '38px',
+                                        }),
+                                        menu: (base) => ({
+                                            ...base,
+                                            borderRadius: 12,
+                                            background: 'linear-gradient(to bottom right, #c8ffff, #f0ffff)',
+                                            boxShadow: '0 4px 10px rgba(0, 150, 180, 0.3)',
+                                            color: '#004d55',
+                                            fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+                                            width: '100%'
+                                        }),
+                                        option: (base, state) => ({
+                                            ...base,
+                                            backgroundColor: state.isFocused ? 'rgba(0, 180, 200, 0.2)' : 'transparent',
+                                            color: '#004d55',
+                                            cursor: 'pointer',
+                                            fontWeight: state.isSelected ? 'bold' : 'normal',
+                                        }),
+                                        singleValue: (base) => ({
+                                            ...base,
+                                            color: '#00575d',
+                                        }),
+                                        dropdownIndicator: (base) => ({
+                                            ...base,
+                                            color: '#00575d',
+                                            ':hover': { color: '#008fa0' },
+                                        }),
+                                        indicatorSeparator: () => ({ display: 'none' }),
+                                    }}
+                                    />
+                            </div>
+
+                        </div>
+                        </div>
                     </div>
-                </div>
 
 
                 {!loading && !error && (
@@ -370,112 +457,18 @@ const Dashboard = () => {
 
             </main>
 
-            <AnimatePresence>
-                {showPopup && (
-                    <motion.div
-                        className="popup-overlay"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                    >
-                        <motion.div
-                            className="popup frutiger-aero-popup"
-                            initial={{ scale: 0.8, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0.8, opacity: 0 }}
-                            transition={{ duration: 0.3 }}
-                        >
+            <TaskPopup
+                showPopup={showPopup}
+                togglePopup={togglePopup}
+                isEditing={isEditing}
+                activeView={activeView}
+                singularLabels={singularLabels}
+                currentTask={currentTask}
+                setCurrentTask={setCurrentTask}
+                handleChange={handleChange}
+                handleSubmit={handleSubmit}
+            />
 
-                        <button className="popup-close" onClick={togglePopup}><i class="bi bi-x x"></i></button>
-                        <h3 className="mb-3">
-                            {isEditing ? `Edit ${singularLabels[activeView]}` : `Add New ${singularLabels[activeView]}`}
-                        </h3>
-                        <Form onSubmit={handleSubmit}>
-                            {/* Title - shown for all types */}
-                            <Form.Group className="mb-3">
-                                <Form.Label className="aero-label">Title</Form.Label>
-                                <Form.Control
-                                    type="text"
-                                    name="title"
-                                    value={currentTask.title}
-                                    onChange={handleChange}
-                                    required
-                                    className="aero-input"
-                                />
-                            </Form.Group>
-
-                            {/* Due Date - only for todo and dailies */}
-                            {(activeView === 'todo' || activeView === 'dailies') && (
-                                <Form.Group className="mb-3">
-                                    <Form.Label className="aero-label">Due Date</Form.Label>
-                                    <DatePicker
-                                        selected={currentTask.dueDate ? new Date(currentTask.dueDate) : null}
-                                        onChange={(date) =>
-                                            setCurrentTask((prev) => ({
-                                                ...prev,
-                                                dueDate: date
-                                            }))
-                                        }
-                                        dateFormat="dd.MM.yyyy"
-                                        className="form-control aero-input"
-                                        calendarClassName="aero-calendar"
-                                    />
-                                </Form.Group>
-                            )}
-
-                            {/* Dailies extra fields */}
-                            {activeView === 'dailies' && (
-                                <>
-                                    <Form.Group className="mb-3">
-                                        <Form.Label className="aero-label">Estimated Time (hours)</Form.Label>
-                                        <Form.Control
-                                            type="number"
-                                            name="estimatedTime"
-                                            value={currentTask.estimatedTime || ''}
-                                            min={0}
-                                            max={24}
-                                            onChange={handleChange}
-                                            className="aero-input"
-                                        />
-                                    </Form.Group>
-                                    <Form.Group className="mb-3">
-                                        <Form.Label className="aero-label">Due Time</Form.Label>
-                                        <Form.Control
-                                            type="time"
-                                            name="dueTime"
-                                            value={currentTask.dueTime || ''}
-                                            onChange={handleChange}
-                                            className="aero-input"
-                                        />
-                                    </Form.Group>
-                                </>
-                            )}
-
-                            {/* Goals - progress only */}
-                            {activeView === 'goals' && (
-                                <Form.Group className="mb-3">
-                                    <Form.Label className="aero-label">Progress (%)</Form.Label>
-                                    <Form.Control
-                                        type="number"
-                                        name="progress"
-                                        value={currentTask.progress}
-                                        min={0}
-                                        max={100}
-                                        onChange={handleChange}
-                                        className="aero-input"
-                                    />
-                                </Form.Group>
-                            )}
-
-                            {/* Button */}
-                            <Button type="submit" variant="primary" className="w-100">
-                                {isEditing ? 'Save Changes' : `Add ${singularLabels[activeView]}`}
-                            </Button>
-                        </Form>
-                        </motion.div>
-                  </motion.div>
-                )}
-            </AnimatePresence>
 
             {/* Nova Assistant Button */}
             <div className="nova-button-container" onClick={handleEvaluate} title="Evaluate today's plan">
