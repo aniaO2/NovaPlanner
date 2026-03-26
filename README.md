@@ -13,14 +13,14 @@ Built with a **React** frontend and an **ASP.NET Core** backend, NovaPlanner int
 - **Habits** — track behaviors with a counter you can **increase / decrease** each time you do (or undo) the habit
 - **Goals** — bigger objectives broken into **checkpoints** (for progress tracking)
 
-  ### Core actions
+### Core actions
 - **Add** tasks
 - **Edit** tasks
 - **Delete** tasks
 - **Mark as done**
 - **Filter** tasks to find what you need faster
 
-  ## Project focus on Reactive Programming
+## Project focus on Reactive Programming
 
 This project highlights the benefits of **reactive programming** in modern web development, emphasizing how reactive data flows can help build a system that is:
 
